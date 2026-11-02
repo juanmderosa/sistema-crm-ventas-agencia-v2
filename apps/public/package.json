@@ -1,0 +1,15 @@
+{
+  "name": "@dealership/public",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1 --port 3000",
+    "build": "next build",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "16.2.9",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  }
+}

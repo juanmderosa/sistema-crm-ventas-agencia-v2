@@ -1,0 +1,23 @@
+{
+  "name": "dealership-mvp",
+  "private": true,
+  "packageManager": "pnpm@10.18.3",
+  "scripts": {
+    "dev:public": "pnpm --filter @dealership/public dev",
+    "dev:backoffice": "pnpm --filter @dealership/backoffice dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:status": "supabase status",
+    "db:reset": "supabase db reset",
+    "db:test": "supabase test db"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "supabase": "3.0.0",
+    "typescript": "^5.1.0"
+  }
+}
