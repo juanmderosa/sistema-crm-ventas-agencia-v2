@@ -21,8 +21,8 @@ Test runner: `pnpm db:test` (`supabase test db`, pgTAP).
 
 | ID | Specs | Route | Status | Evidence |
 |---|---|---|---|---|
-| T1 | S1-S6 | inline | done | `20261102120000_identity_and_roles.sql`; `0001_identity_test.sql` 21/21 passing |
-| T2 | S7 | inline | done | `20261102130000_vehicles.sql`; `0002_vehicles_test.sql` 15/15 passing |
+| T1 | S1-S6 | inline | done | `20261102120000_identity_and_roles.sql`; `0001_identity_test.sql` 21/21 passing; commit `4ea16a3` |
+| T2 | S7 | inline | done | `20261102130000_vehicles.sql`; `0002_vehicles_test.sql` 15/15 passing; commit `2ffef59` |
 | T3 | S8 | inline | pending | inquiries, interests and rotation |
 | T4 | S9 | inline | pending | reservations with unique constraints |
 | T5 | S10 | inline | pending | sale review and confirmation |
