@@ -1,0 +1,26 @@
+# Directorios de entornos virtuales
+venv/
+.venv/
+env/
+.env
+.env.*
+
+# Configuraciones del editor de código
+.vscode/
+.idea/
+.DS_Store
+
+# Local JavaScript tooling and build output
+node_modules/
+.next/
+*.tsbuildinfo
+next-env.d.ts
+
+# Local Supabase runtime files
+supabase/.branches/
+supabase/.profiles/
+supabase/.temp/
+
+# Local tool caches and memory
+.engram/
+.atl/*.cache.json

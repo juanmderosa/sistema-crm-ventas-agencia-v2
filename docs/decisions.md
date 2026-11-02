@@ -1,0 +1,91 @@
+# Decisions and unresolved gates
+
+Date: 2026-11-02. Product approval is recorded in the conversation and project memory. This log does not grant deployment authority.
+
+## Approved baseline
+
+| Decision | Reason | Consequence |
+|---|---|---|
+| Single dealership first | Reduce initial platform scope | Future multiagency requires design and migration work, not a feature toggle |
+| Two Next.js apps, one repository | Separate public/private experiences and deployments without two frameworks | Two deployment configurations; shared code must preserve server/private boundaries |
+| Editable shadcn/ui initially | Simplify delivery with future visual freedom | Maintain copied/customized components; replacement still requires work and regression checks |
+| Supabase database/Auth/Storage | Keep the chosen backend integrated | Respect free quotas; auth email and storage capacity require proof |
+| Cloudflare provisional | Candidate for zero-cost hosting | Must pass compatibility/runtime limits before functional implementation |
+| Free provider addresses | Avoid domain expense | Branded domains deferred |
+| Admin-managed inventory; inquiry-level seller assignment | Separate catalog control from commercial ownership | Owner/Admin control general inventory; sellers have only the later-approved, inquiry-linked reservation exception. All active sellers are eligible for every vehicle; no seller vehicle assignment or exclusion in MVP |
+| Multi-vehicle interests per inquiry | Represent a customer considering several vehicles without duplicating conversations | An active inquiry has one responsible person and may record several available vehicles of interest; adding an interest does not create another inquiry or reservation. If another inquiry later reserves it, the interest remains but it cannot be reserved until available again. Count inquiries once for originating vehicle, not for every interest |
+| Attribute multi-vehicle events without duplicating inquiry | Preserve meaningful vehicle reporting when a customer considers several units | Inquiry belongs to originating vehicle once; additional vehicles are interests. Visits, reservations and confirmed sales belong to the specific vehicle involved; formulas, period rules and reversals are still pending |
+| Close multi-vehicle inquiry for the confirmed sale | Preserve one commercial outcome without treating every interested vehicle as sold | Upon Owner/Admin confirmation, inquiry remains Venta concretada for the specific Sold vehicle; other interests remain in history, no additional sales and no automatic closure of other inquiries |
+| Allow reserving any Available interest from an inquiry | A customer can choose a vehicle different from the one that originated the conversation | Seller may reserve a listed Available interest from own active inquiry regardless of originating vehicle; reservation links that exact vehicle, inquiry and contact. One active reservation per vehicle and per linked inquiry remains enforced |
+| Limit each inquiry to one active reservation | Avoid blocking several vehicles for the same customer's single inquiry | A second reservation for the same inquiry is rejected even if it targets a different Available vehicle; cancel the existing reservation first and retain its history. Enforce together with one active reservation per vehicle under concurrent requests |
+| Bind each visit to one vehicle of interest | Preserve the vehicle being visited within a multi-vehicle conversation | Visit from existing active inquiry identifies one interest vehicle and reuses that inquiry without a new inquiry or automatic reservation; public vehicle-page visit still creates an inquiry through normal routing |
+| Seller reservation from own inquiry (limited exception) | Give an assigned seller immediate, exclusive reservation without general inventory editing | Only from an active inquiry assigned to self for an Available vehicle; atomically link the reservation to inquiry/contact and mark vehicle Reserved, allowing at most one active reservation. Owner/Admin retain general inventory management and confirm Sold; this narrows the earlier no-inventory-writes rule |
+| Seller cancellation of own active reservation | Let the seller who handles the linked inquiry release a fallen reservation without opening general inventory editing | Only if the active reservation links to an inquiry still assigned to that active seller; atomically end it, restore Available and retain history. Owner/Admin can cancel; seller deactivation does not automatically cancel |
+| Block reassignment while inquiry holds an active reservation | Avoid transferring commercial responsibility while a vehicle remains reserved for that inquiry's contact | First cancel the reservation or resolve the sale through Owner/Admin; after cancellation apply normal active-inquiry eligibility or closed-inquiry reopening rules. Seller deactivation requires administrative resolution of the reservation |
+| Preserve reservation when its seller is deactivated | Revoke unsafe access without promising the vehicle to another customer | Immediately deny inactive seller access and routing; keep vehicle Reserved and surface the reservation to Owner/Admin for explicit resolution before reassignment. Preserve history and reject cancellation from stale seller sessions |
+| Conditional seller continuity | Preserve interlocutor when active and eligible for the originating vehicle | Most-recent eligible active inquiry has priority; all active sellers are eligible for every vehicle in MVP, while Owner/Admin require individual vehicle enablement; round robin remains fallback |
+| Same-contact concurrent continuity | Prevent two simultaneous intentional submissions from bypassing the approved continuity rule | Order creation for the same normalized contact so the later inquiry considers the earlier committed active inquiry; keep distinct submissions distinct and retries idempotent. Locking and transaction implementation remain to be designed and tested |
+| Retain submission ID with inquiry | Prevent late technical retries from creating duplicate inquiries without a separate cleanup mechanism | Client-generated random ID is unique and persists with the inquiry without its own expiry; same ID and changed data is rejected; repeated public response must be privacy-safe. Actual payload comparison and transactional enforcement remain to be designed and tested |
+| Preserve an active Owner | Prevent administrative lockout | Backend rejects deactivation or role removal of the last active Owner, even under concurrent account changes. Exceptional recovery remains unresolved |
+| Bootstrap the initial Owner with a manually run script | Make account setup controlled and reproducible without opening public registration | Run a purpose-built script from a trusted environment; keep privileged credentials out of browser/source/logs; reject routine reruns if an active Owner exists and design partial Auth/profile failure recovery. This does not authorize creating accounts or executing remotely |
+| Recover partial initial Owner bootstrap without deletion | Avoid orphaning or accidentally deleting an Auth identity after profile creation fails | Controlled rerun verifies the intended identity and fills the missing Owner profile only if no active Owner exists; ambiguous/conflicting states require manual resolution, not automatic deletion |
+| Optional administrative participation per vehicle | Let Owner/Admin handle commercial inquiries when enabled at vehicle creation | Select individual people with none preselected; active selected participants join the same round robin and continuity pool, not a backup route |
+| Allow later removal of administrative commercial participation | Allow Owner/Admin to stop selecting an individual Owner/Administrator for one vehicle without changing their role | Removal blocks new assignments including continuity, but preserves existing inquiry responsibility/access until explicit reassignment |
+| Allow later addition of administrative commercial participation | Permit Owner/Admin to opt an individual into commercial routing after vehicle creation | Addition affects future inquiries only, without transferring existing inquiries; administrative role and permissions remain unchanged |
+| Allow explicit transfer of administratively handled inquiries | Let an Administrator change who handles a consultation already assigned to an Owner/Administrator | Reassignment changes commercial responsibility and preserves history, not the previous handler's global administrative access; this is distinct from removing future routing eligibility |
+| Enforce current eligibility on manual reassignment | Keep active-user access and individual administrative participation meaningful for every new assignment | Reject transfer to an inactive seller or inactive/non-enabled Owner/Admin for the originating vehicle in the backend. Existing inquiry ownership is not revoked solely by eligibility changes; multi-vehicle interest edge cases remain to be defined |
+| Reopen before transferring closed inquiries | Avoid rewriting responsibility for a completed commercial outcome without reopening work | Direct reassignment of either closed status is rejected; an authorized user first reopens it to En seguimiento, then Owner/Admin can reassign to an eligible person while preserving history and inventory availability |
+| Create an administrative review task after seller sale | Give Owner/Admin an actionable handoff without granting inventory writes to sellers | Seller marking Venta concretada reports a sale and creates a pending Owner/Admin task, not a confirmed sale. For an active reservation, Owner/Admin ends it on explicit Sold confirmation or cancels it before correcting that inquiry to Cerrada sin venta with history; other inquiries remain unchanged. Sales count only on confirmed vehicle Sold transitions, without counting one unit twice; reporting attribution/reversals remain pending |
+| Identify reported sale vehicle without mandatory reservation | A customer may purchase an interested vehicle directly without first reserving it | Seller reports Venta concretada for an explicit interest vehicle: reserved vehicle of that inquiry if active reservation exists, otherwise an Available interest. Reject a vehicle reserved by another inquiry or already Sold; administrative review task identifies the vehicle and confirmation rechecks its state |
+| Honor competing reservation before confirming an unreserved sale | Avoid selling a vehicle promised to another customer after an unreserved sale report | If another inquiry reserves the reported vehicle before Owner/Admin confirms Sold, reject confirmation for the reporting inquiry until the reservation is explicitly resolved; do not auto-cancel or displace it, and leave sale review pending. Enforce under concurrent requests |
+| Protect reserved inquiry from closure without sale | Keep vehicle availability and the linked inquiry consistent | Permit reporting Venta concretada while reserved, but reject Cerrada sin venta until the reservation is cancelled. An administrative rejection of a reported sale cancels the reservation and corrects the inquiry coherently |
+| Own limited pageview measurement | Report vehicle performance directly in the panel | Define counting, abuse controls and temporal calculations; no unique-visitor claims |
+| Soft delete only | Retain commercial references initially | Storage continues accumulating; later hard delete must preserve agreed statistics |
+| Browser image compression initially | Reduce upload friction without a compression service | Device compatibility and output quality need tests; server validation remains mandatory |
+| Provider-independent commercial rules | Keep the pilot infrastructure replaceable without changing commercial behavior | Define business behavior and acceptance tests independently of Supabase/Next.js; enforce authorization and atomic assignment in the backend. Replacing provider-specific policies, transactions or integrations still requires migration work; no speculative generic repository layer |
+
+## Foundation work still pending
+
+Local-first implementation begins with separate loopback-only public and backoffice application shells. This does not approve deployment or mark the foundation complete: authentication, backend authorization and real data flows still require implementation and verification. Advanced reporting definitions can wait until the reporting flow, without weakening the integrity requirements of earlier flows.
+
+pnpm is the approved package manager for the local workspace; use its pinned version and `pnpm-lock.yaml` rather than npm's lockfile. This changes dependency management only, not hosting, backend security or product scope.
+
+| Item | Status / required resolution |
+|---|---|
+| Local documentation baseline | Prepared; seven nonempty UTF-8 files checked, local links resolve, no conflict markers |
+| Git repository | Initialized locally on branch `main`; no commits or remote configured as of 2026-11-02 |
+| Application manifests and dependencies | Two Next.js workspace shells and local dependency lockfile created; no business-flow implementation |
+| Screen map and SQL schema | Versioned schema started: `profiles` (roles, owner guard, RLS) and `vehicles` (publication, availability, soft delete, RLS), both covered by pgTAP suites. Screen map, inquiries, visits, reservations, sales and reporting still missing |
+| Local Supabase stack | Started and verified with the pinned CLI: REST `200`, Auth health `200`, signup rejected `422`, real anon-key enforcement observed. Ports moved out of the Windows reserved range; new tables require explicit grants |
+| Auth email and initial Owner | Provider delivery/quota not verified; bootstrap script and controlled partial-failure recovery approved but not implemented or executed |
+| Cloudflare proof | Not executed; deployment adapter and free runtime envelope unresolved |
+| Storage/transfer budget | Not measured; maximum planned photos can exceed quota |
+| Analytics definitions | Counting, retention, bot/internal traffic, rate formulas and attribution windows unresolved |
+| Contact updates | Retain existing fields, store discrepant public name/email on inquiry for review; reject phone-change collisions without data changes; shared-phone identities and merging excluded from MVP |
+| CI and local checks | Local typecheck/build and loopback HTTP smoke checks verified for shells; CI and real backend tests not configured |
+| Recovery | Backup/export/image recovery process and free-tier feasibility not validated |
+
+## Later stages, not current implementation
+
+Approved reassignment clarification (2026-11-02): previous sellers lose inquiry-detail access after reassignment, but retain historical activity attribution in authorized statistics without a detail-access bypass. Administrative global access is unchanged.
+
+Approved CRM clarification (2026-11-02): sellers may reopen their own inquiries closed without sale; completed-sale inquiry reopening is Owner/Administrator-only. Every reopening returns to En seguimiento, preserves history and never changes vehicle availability as a side effect.
+
+- Manual entry of offline/telephone inquiries and origin attribution.
+- Hard delete with preserved statistics; detailed retention/aggregation policy.
+- Multiagency operation and reconsideration of exclusive customer ownership.
+- Deeper UI customization and reconsideration of browser compression.
+
+Subscriptions, invoicing, payments, WhatsApp conversation integration and a visual site editor remain excluded. Future-work listing is not approval to implement those features.
+
+## Approved correction: inventory versus inquiry ownership (2026-11-02)
+
+The user explicitly replaced seller vehicle assignments and direct inventory management: sellers receive and handle assigned inquiries only; Owner/Administrator control inventory creation, publication, prices, sale availability and archival. A later limited exception allows sellers to reserve from their own active inquiries and cancel their own active reservations. All active sellers are eligible for every vehicle in the MVP; the previously approved seller exclusion mechanism is now superseded. Several inquiries for a vehicle may have different assignees; this is not a requirement to force a different seller on each submission. Existing active-contact continuity remains applicable using the new eligibility definition.
+
+The earlier broad seller permissions to reserve, mark sold and archive were superseded. A later narrow exception allows sellers to reserve only from an active inquiry assigned to them and cancel their own linked reservation, without general vehicle-edit permissions. No runtime policies have been implemented. Sellers may read all vehicles and internal prices independently of public visibility or inquiry ownership; coworkers' inquiries remain private and Owner/Administrator control all other inventory writes.
+
+## Superseded clarification: prospective routing exclusions (2026-11-02)
+
+Excluding a seller means no new inquiries for that vehicle, including continuity-based assignments. Existing inquiries retain their assignee and authorized access until Owner/Administrator explicitly reassigns them. This avoids interrupting ongoing customer conversations. Use clear UI copy such as “No recibir nuevas consultas de este vehículo”. Exclusion does not revoke historical access; user deactivation remains a separate workflow that removes operational access and leaves open inquiries pending reassignment.
+
+This historical rule is superseded for the MVP: no per-vehicle seller exclusion is implemented. All active sellers are eligible for every vehicle; optional Owner/Administrator participation remains individually configured by vehicle.
