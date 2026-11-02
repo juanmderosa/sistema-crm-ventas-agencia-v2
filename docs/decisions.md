@@ -89,3 +89,18 @@ The earlier broad seller permissions to reserve, mark sold and archive were supe
 Excluding a seller means no new inquiries for that vehicle, including continuity-based assignments. Existing inquiries retain their assignee and authorized access until Owner/Administrator explicitly reassigns them. This avoids interrupting ongoing customer conversations. Use clear UI copy such as “No recibir nuevas consultas de este vehículo”. Exclusion does not revoke historical access; user deactivation remains a separate workflow that removes operational access and leaves open inquiries pending reassignment.
 
 This historical rule is superseded for the MVP: no per-vehicle seller exclusion is implemented. All active sellers are eligible for every vehicle; optional Owner/Administrator participation remains individually configured by vehicle.
+
+## Branching and integration workflow (2026-11-02)
+
+| Decision | Reason | Consequence |
+|---|---|---|
+| `develop` is the integration branch; `main` receives only integrated, verified work | Keep an always-releasable line separate from in-progress integration | Peer branches start from `develop`, never from `main`. Feature work reaches `main` only through `develop` |
+| Every feature gets its own short-lived branch off `develop` | Isolate a reviewable unit of behavior and keep integration history legible | A feature branch is merged back into `develop` and then deleted. Long-lived feature branches are not kept |
+| Commit messages follow Conventional Commits, without AI attribution | Keep the history machine-readable and attribution honest | Each work unit lands as a reviewable slice with its tests and docs |
+| Every published branch carries a written summary of what was added, changed and removed | A reviewer (or the future you) must understand the change without reconstructing it from the diff | The pull request description states the change explicitly, with the verification actually run and any known limitation. A vague or empty summary blocks review |
+
+Every branch that reaches `origin` with a pull request carries that summary, not only a title. At minimum it states what was added, what was changed, and what was removed or deliberately left out — plus the verification that was really executed and any open limitation. The summary describes the change; it never claims proof that was not observed, and it never hides a failed, skipped or pending check.
+
+The model was reviewed and confirmed by the user (2026-11-02), with explicit reasons: `main` is the production line and must never receive half-tested work, continuous integration will be added on top of `develop`, and local experimentation stays away from production code.
+
+Reviewed tradeoff: with a single developer, `develop` adds one integration hop that `main` alone would not need, and it only returns its full value once automated checks and a deployment from `main` exist. The rule that keeps it safe in the meantime is that feature branches stay short and always return to `develop`; a branch that never comes back is dead work.
