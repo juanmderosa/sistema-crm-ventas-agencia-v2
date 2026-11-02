@@ -90,6 +90,24 @@ Excluding a seller means no new inquiries for that vehicle, including continuity
 
 This historical rule is superseded for the MVP: no per-vehicle seller exclusion is implemented. All active sellers are eligible for every vehicle; optional Owner/Administrator participation remains individually configured by vehicle.
 
+## Approved inquiry phone input (2026-11-02)
+
+Require international phone input with a country selector defaulting to Argentina, and store the normalized number. Do not infer ambiguous prefixes. This number is a routing aid, not proof of identity or authorization.
+
+User confirmation: "Si, usemos ese criterio".
+
+## Approved inquiry rotation scope (2026-11-02)
+
+Use round robin per originating vehicle among its currently eligible participants. Assignments resolved through contact continuity do not advance that vehicle's rotation cursor.
+
+User confirmation: "Usemos esa regla".
+
+## Approved continuity timestamp tie-break (2026-11-02)
+
+When eligible active inquiries have identical creation timestamps, use their sequential creation order: the last created inquiry wins. Do not use random UUID ordering to resolve continuity.
+
+User confirmation: "lo aplicamos".
+
 ## Branching and integration workflow (2026-11-02)
 
 | Decision | Reason | Consequence |
