@@ -36,6 +36,8 @@ Ports are shifted from Supabase's defaults because Windows reserves TCP `54079-5
 
 Two hardening defaults are set in `supabase/config.toml`: `api.auto_expose_new_tables = false`, so new tables need explicit grants, and `auth.enable_signup = false`, because the MVP has no public registration and the initial Owner is created by a controlled script. Local keys printed by `db:status` are throwaway development credentials; do not reuse them outside the local stack.
 
+Log analytics (`[analytics] enabled = false`) is off locally. Its collector kept restarting because it needs Docker's socket over TCP, which Docker Desktop does not expose here, and nothing in the MVP reads Supabase log analytics. Re-enable it only if log exploration becomes an actual requirement.
+
 ## Still missing
 
 No schema migrations, database policies, Auth bootstrap or business flows exist yet. The applications do not connect to the local backend. Hosting, email delivery, storage quotas and recovery remain separate pilot validation gates; local success does not prove free-tier viability.
