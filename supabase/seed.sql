@@ -1,0 +1,4 @@
+-- Local seed data only.
+-- Keep this file free of real customer data, credentials and privileged keys.
+-- Reference data (roles, statuses) will be added with the initial schema migration
+-- once those catalog values are approved.
