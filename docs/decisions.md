@@ -108,6 +108,12 @@ When eligible active inquiries have identical creation timestamps, use their seq
 
 User confirmation: "lo aplicamos".
 
+## Inquiry delivery boundaries (2026-11-02)
+
+The user chose: "Prefiero que se unan primero en feat/inquiries". Keep dependent deliveries together on `feat/inquiries` before integrating into `develop`; each delivery includes its own tests and documentation. No remote publication or integration is authorized by this choice.
+
+Implement creation as a service-only database operation first. Anonymous and authenticated clients receive no direct mutation access. A future public endpoint must validate real phone numbers, apply abuse protection and return only approved commercial contact details; those boundaries are not proved by a successful internal database call.
+
 ## Branching and integration workflow (2026-11-02)
 
 | Decision | Reason | Consequence |
