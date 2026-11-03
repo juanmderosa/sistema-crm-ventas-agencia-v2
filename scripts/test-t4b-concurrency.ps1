@@ -55,6 +55,7 @@ $v4 = '30000000-0000-0000-0000-000000000004'
 $v5 = '30000000-0000-0000-0000-000000000005'
 $v6 = '30000000-0000-0000-0000-000000000006'
 $v7 = '30000000-0000-0000-0000-000000000007'
+$v8 = '30000000-0000-0000-0000-000000000008'
 $i1 = '40000000-0000-0000-0000-000000000001'
 $i2 = '40000000-0000-0000-0000-000000000002'
 $i3 = '40000000-0000-0000-0000-000000000003'
@@ -62,6 +63,7 @@ $i4 = '40000000-0000-0000-0000-000000000004'
 $i5 = '40000000-0000-0000-0000-000000000005'
 $i6 = '40000000-0000-0000-0000-000000000006'
 $i7 = '40000000-0000-0000-0000-000000000007'
+$i8 = '40000000-0000-0000-0000-000000000008'
 $hash = "select 'HASH:'||md5(string_agg(t,'|' order by t)) from (select row_to_json(x)::text t from public.vehicles x union all select row_to_json(x)::text from public.inquiries x union all select row_to_json(x)::text from public.inquiry_interests x union all select row_to_json(x)::text from public.reservations x union all select row_to_json(x)::text from public.inquiry_assignment_history x) z;"
 
 function Race([string]$Name, [string]$Winner, [string]$Loser, [string]$ExpectedError, [bool]$Preserve = $true) {
@@ -105,7 +107,8 @@ insert into public.profiles(id,role,display_name) values
 insert into public.vehicles(id,brand,model,year,publication_status,availability_status) values
   ('$v1','Test','One',2024,'published','available'),('$v3','Test','Three',2024,'published','available'),
   ('$v4','Test','Four',2024,'published','available'),('$v5','Test','Five',2024,'published','available'),
-  ('$v6','Test','Six',2024,'published','available'),('$v7','Test','Seven',2024,'published','available');
+  ('$v6','Test','Six',2024,'published','available'),('$v7','Test','Seven',2024,'published','available'),
+  ('$v8','Test','Eight',2024,'published','available');
 insert into public.contacts(id,normalized_phone,display_name,email) values
   ('$c1','+54110001','Contact One','one@example.invalid'),('$c2','+54110002','Contact Two','two@example.invalid');
 insert into public.inquiries(id,submission_id,contact_id,originating_vehicle_id,assignee_id,submitted_name,submitted_email,submitted_phone) values
@@ -115,10 +118,11 @@ insert into public.inquiries(id,submission_id,contact_id,originating_vehicle_id,
   ('$i4','$i4','$c1','$v5','$seller3','Four','one@example.invalid','+54110001'),
   ('$i5','$i5','$c2','$v5','$seller4','Five','two@example.invalid','+54110002'),
   ('$i6','$i6','$c1','$v6','$seller3','Six','one@example.invalid','+54110001'),
-  ('$i7','$i7','$c1','$v7','$seller3','Seven','one@example.invalid','+54110001');
+  ('$i7','$i7','$c1','$v7','$seller3','Seven','one@example.invalid','+54110001'),
+  ('$i8','$i8','$c1','$v8','$seller3','Eight','one@example.invalid','+54110001');
 insert into public.inquiry_interests(inquiry_id,vehicle_id) values
   ('$i1','$v1'),('$i2','$v1'),('$i3','$v3'),('$i3','$v4'),('$i4','$v5'),('$i5','$v5'),
-  ('$i6','$v6'),('$i7','$v7');
+  ('$i6','$v6'),('$i7','$v7'),('$i8','$v8');
 "@ | Out-Null
     $ownerActor = Actor $owner
     Sql "$ownerActor select public.reserve_inquiry_vehicle('$i4','$v5');" | Out-Null
@@ -140,6 +144,15 @@ insert into public.inquiry_interests(inquiry_id,vehicle_id) values
     Race 'reserve_vs_availability' "$(Actor $seller3) select public.reserve_inquiry_vehicle('$i7','$v7');" `
         "set role service_role; update public.vehicles set availability_status='sold' where id='$v7';" `
         '22023: cancel the active reservation before changing availability'
+    Race 'block_then_reserve' "$(Actor $owner) select public.set_vehicle_sale_blocked('$v8', true);" `
+        "$(Actor $seller3) select public.reserve_inquiry_vehicle('$i8','$v8');" `
+        '22023: vehicle must be Available and enabled for sale'
+    Assert ((Sql "select count(*) from public.vehicles where id='$v8' and not sale_enabled;") -eq '1') 'Blocking did not take effect'
+    Sql "$ownerActor select public.set_vehicle_sale_blocked('$v8', false);" | Out-Null
+    Assert ((Sql "select count(*) from public.vehicles where id='$v8' and sale_enabled;") -eq '1') 'Re-enabling the vehicle failed'
+    Race 'reserve_then_block' "$(Actor $seller3) select public.reserve_inquiry_vehicle('$i8','$v8');" `
+        "$(Actor $owner) select public.set_vehicle_sale_blocked('$v8', true);" `
+        '22023: cancel the active reservation before blocking the vehicle'
 
     Assert ((Sql "select count(*) from public.reservations where vehicle_id='$v1' and status='active';") -eq '1') 'Vehicle collision kept a second reservation'
     Assert ((Sql "select availability_status from public.vehicles where id='$v1';") -eq 'reserved') 'Vehicle collision left the vehicle unreserved'
@@ -152,6 +165,9 @@ insert into public.inquiry_interests(inquiry_id,vehicle_id) values
     Assert ((Sql "select availability_status from public.vehicles where id='$v6';") -eq 'available') 'Double cancel restored availability twice or not at all'
     Assert ((Sql "select count(*) from public.reservations where inquiry_id='$i7' and status='active';") -eq '1') 'Reserve-then-sell lost the reservation'
     Assert ((Sql "select availability_status from public.vehicles where id='$v7';") -eq 'reserved') 'Reserve-then-sell changed availability'
+    Assert ((Sql "select count(*) from public.reservations where vehicle_id='$v8' and status='active';") -eq '1') 'Blocking race left the wrong reservation count'
+    Assert ((Sql "select availability_status from public.vehicles where id='$v8';") -eq 'reserved') 'Blocking race left the vehicle unreserved'
+    Assert ((Sql "select count(*) from public.vehicles where id='$v8' and sale_enabled;") -eq '1') 'Rejected blocking changed the sale flag'
     Write-Output 'terminal state PASS (one active reservation per vehicle and per inquiry)'
 } finally {
     if (-not $KeepDatabase) {
