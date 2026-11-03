@@ -67,13 +67,13 @@ Status: baseline derived from approved roles, not implemented policies. Owner an
 - A manual reassignment may target only someone currently eligible for the inquiry's originating vehicle: an active seller or an active, individually enabled Owner/Administrator. Reject reassignment to an ineligible person server-side; existing ownership is unaffected until an explicit reassignment succeeds. Multi-vehicle interest edge cases require explicit rules before implementation.
 - Reject reassignment of an inquiry while it anchors an active vehicle reservation. Cancel the reservation first or have Owner/Administrator resolve the sale; only then apply normal active-inquiry reassignment or closed-inquiry reopening rules. The check and any reassignment must be protected against concurrent reservation changes.
 - Owner/Administrator access parity applies to all ordinary dealership operations, not just rows listed here.
+- Shared contact edits use mandatory optimistic revision checks: reject a stale edit without changes and request reload. Owner/Admin phone collisions are rejected without merging. Real phone parsing and UI conflict handling remain pending.
 
 ## Open decisions before policy implementation
 
 - Exact bootstrap script implementation and exceptional recovery if no active Owner remains due to an external failure; ambiguous or conflicting partial states require manual resolution.
 - Other corrections to closed inquiries outside the approved Owner/Administrator sale-review correction; reopening never changes inventory availability automatically.
 - Permitted CRM actions of other inquiry assignees while a vehicle is reserved.
-- Conflict handling for concurrent shared contact edits; phone-change collisions are rejected without merging.
 - Asset visibility transitions and retention; exact statistics projections must preserve the approved detail-access revocation after reassignment.
 
 These gaps must not be interpreted as permission grants. This document does not implement authentication or RLS.

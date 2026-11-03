@@ -114,6 +114,10 @@ The user chose: "Prefiero que se unan primero en feat/inquiries". Keep dependent
 
 Implement creation as a service-only database operation first. Anonymous and authenticated clients receive no direct mutation access. A future public endpoint must validate real phone numbers, apply abuse protection and return only approved commercial contact details; those boundaries are not proved by a successful internal database call.
 
+## Approved shared-contact conflict protection (2026-11-03)
+
+User confirmation: "Si, usemos esa protección contra sobreescrituras." Contact details and authorized phone corrections require the revision read by the caller. A stale edit is rejected atomically with a reload instruction; it never silently overwrites the winning edit. Every successful contact update increments the revision, including trusted direct updates. Existing role restrictions, submitted snapshots and phone-collision rejection remain unchanged. UI conflict handling and real phone parsing are separate pending work.
+
 ## Branching and integration workflow (2026-11-02)
 
 | Decision | Reason | Consequence |
