@@ -1,0 +1,98 @@
+begin;
+create extension if not exists pgtap with schema extensions;
+select no_plan();
+insert into auth.users(id,email) select md5('diff.actor.'||n)::uuid,'diff'||n||'@example.invalid' from generate_series(1,4)n;
+insert into profiles(id,role,display_name) select md5('diff.actor.'||n)::uuid,(case n when 1 then 'owner' when 2 then 'admin' else 'seller' end)::user_role,'Actor '||n from generate_series(1,4)n;
+insert into vehicles(id,brand,model,year,publication_status) values(md5('diff.car')::uuid,'Independent','Differential',2024,'published');
+create function pg_temp.snap() returns text language plpgsql as $$
+declare r record;pieces text:='';piece text;
+begin
+for r in select tablename from pg_tables where schemaname='public' order by tablename loop
+execute format('select coalesce(jsonb_agg(j order by j::text)::text,''null'') from (select to_jsonb(t) j from public.%I t)q',r.tablename) into piece;
+pieces:=pieces||r.tablename||piece;
+end loop;
+return md5(pieces||(select jsonb_build_array(last_value,is_called)::text from inquiries_creation_sequence_seq));
+end$$;
+create function pg_temp.bad_email(email text) returns setof text language plpgsql as $$
+declare h text:=pg_temp.snap();s text;m text;
+begin
+perform set_config('role','service_role',true);
+begin
+perform submit_inquiry(md5('diff.submission')::uuid,md5('diff.car')::uuid,'+541155550001','Web',email);
+exception when others then get stacked diagnostics s=returned_sqlstate,m=message_text;
+end;
+perform set_config('role','none',true);
+return next is(s,'22023','web missing/blank email SQLSTATE');
+return next is(m,'invalid inquiry input','web missing/blank email exact message');
+return next is(pg_temp.snap(),h,'web rejection complete unchanged hash');
+end$$;
+select r.* from unnest(array[null,'','   '])email cross join lateral pg_temp.bad_email(email)r;
+set local role service_role;
+select is(submit_inquiry(md5('diff.submission')::uuid,md5('diff.car')::uuid,'+541155550001','Web','web@example.invalid'),' {"accepted":true}'::jsonb,'web response contract');
+select is(submit_inquiry(md5('diff.submission')::uuid,md5('diff.car')::uuid,'+541155550001','Web','web@example.invalid'),' {"accepted":true}'::jsonb,'web identical retry response');
+reset role;
+select is((select count(*)::integer from inquiries),1,'web retry does not duplicate');
+select is((select count(*)::integer from inquiry_interests),1,'web creates one interest');
+select is((select count(*)::integer from contacts),1,'web creates one contact');
+select is((select submitted_name||'|'||submitted_phone||'|'||submitted_email from inquiries),'Web|+541155550001|web@example.invalid','web submitted snapshot');
+select is((select role::text from profiles where id=(select assignee_id from inquiries)),'seller','web routing remains seller');
+select is((select reason from inquiry_assignment_history),'rotation','web assignment reason');
+select ok((select last_assignee_id=(select assignee_id from inquiries) from vehicle_inquiry_rotation),'web rotation tracks assignment');
+select 'DIFF:web:'||jsonb_build_array((select assignee_id from inquiries),(select submitted_name from inquiries),(select submitted_phone from inquiries),(select submitted_email from inquiries),(select reason from inquiry_assignment_history),(select last_assignee_id from vehicle_inquiry_rotation))::text;
+select is((select coalesce(to_jsonb(i)->>'origin','web') from inquiries i),'web','web origin remains web (implicit at baseline)');
+-- Reassignment remains an administrative service path, not a new seller API.
+create temp table assignment as select assignee_id old_id,case when assignee_id=md5('diff.actor.3')::uuid then md5('diff.actor.4')::uuid else md5('diff.actor.3')::uuid end new_id from inquiries;
+grant select on assignment to service_role;
+set local role service_role;
+update inquiries set assignee_id=(select new_id from assignment) where submission_id=md5('diff.submission')::uuid;
+reset role;
+select set_config('request.jwt.claim.sub',(select old_id::text from assignment),true);
+set local role authenticated;
+select is((select count(*)::integer from inquiries),0,'reassigned old seller loses inquiry read');
+reset role;
+create temp table before_denied_transfer as select pg_temp.snap() h;
+select set_config('request.jwt.claim.sub',(select new_id::text from assignment),true);
+set local role authenticated;
+select is((select count(*)::integer from inquiries),1,'reassigned new seller gains inquiry read');
+select throws_ok('update inquiries set assignee_id=null','42501','permission denied for table inquiries','seller cannot reassign directly');
+reset role;
+select is(pg_temp.snap(),(select h from before_denied_transfer),'denied seller reassignment complete unchanged hash');
+select is((select count(*)::integer from inquiry_assignment_history),1,'generic reassignment retains existing history');
+select 'DIFF:assignment:'||jsonb_build_array((select assignee_id from inquiries),(select count(*) from inquiry_assignment_history))::text;
+-- Both administrative roles retain generic inventory updates without reservation.
+select set_config('request.jwt.claim.sub',md5('diff.actor.1')::uuid::text,true);
+set local role authenticated;
+update vehicles set model='Owner edit',availability_status='reserved',publication_status='draft' where id=md5('diff.car')::uuid;
+select is((select model||'|'||availability_status||'|'||publication_status from vehicles),'Owner edit|reserved|draft','Owner generic independent inventory fields');
+reset role;
+select set_config('request.jwt.claim.sub','',true);
+set local role anon;
+select is((select count(*)::integer from vehicles),0,'draft generic update hides public row');
+reset role;
+select set_config('request.jwt.claim.sub',md5('diff.actor.2')::uuid::text,true);
+set local role authenticated;
+update vehicles set model='Admin edit',availability_status='sold',publication_status='published' where id=md5('diff.car')::uuid;
+select is((select model||'|'||availability_status||'|'||publication_status from vehicles),'Admin edit|sold|published','Admin generic inventory update');
+reset role;
+select set_config('request.jwt.claim.sub','',true);
+set local role anon;
+select is((select count(*)::integer from vehicles),1,'published Sold informative page remains readable');
+reset role;
+create temp table before_denied_inventory as select pg_temp.snap() h;
+select set_config('request.jwt.claim.sub',md5('diff.actor.3')::uuid::text,true);
+set local role authenticated;
+with changed as(update vehicles set model='Seller forbidden' returning id) select is(count(*)::integer,0,'seller generic inventory update affects zero rows') from changed;
+reset role;
+select is(pg_temp.snap(),(select h from before_denied_inventory),'denied seller inventory complete unchanged hash');
+select set_config('request.jwt.claim.sub',md5('diff.actor.1')::uuid::text,true);
+set local role authenticated;
+update vehicles set deleted_at=now() where id=md5('diff.car')::uuid;
+select is((select count(*)::integer from vehicles),1,'staff retain soft-deleted inventory');
+reset role;
+select set_config('request.jwt.claim.sub','',true);
+set local role anon;
+select is((select count(*)::integer from vehicles),0,'soft deletion removes public row');
+reset role;
+select 'DIFF:inventory:'||jsonb_build_array(model,availability_status,publication_status,deleted_at is not null)::text from vehicles;
+select * from finish();
+rollback;
