@@ -49,6 +49,7 @@ Objetivo: operar con una concesionaria, validando el flujo comercial completo y 
 - Vendidos salen del catálogo y conservan su ficha informativa si estaban publicados, sin solicitud de visita ni contacto directo.
 - Desde vendidos, “Ver vehículos similares” abre una búsqueda editable por tipo de vehículo y categoría de auto/moto. No exige marca/modelo iguales ni crea una consulta.
 - Baja lógica en el MVP; borrado definitivo y conservación estadística se diseñarán en otra etapa.
+- Dueño y Administrador pueden bloquear o habilitar un vehículo para la venta. El bloqueo interno es distinto de una reserva comercial y no cuenta como tal. Se rechaza bloquear un vehículo con reserva activa: primero debe resolverse explícitamente la reserva, sin cancelación automática. Un vehículo bloqueado no se muestra en el sitio público; conserva información e historial en el panel privado.
 - Filtros: tipo de vehículo, marca, modelo, año, precio, kilometraje, transmisión manual/automática, tipo de auto, tipo de moto y cilindrada para motos.
 - Orden por precio o publicaciones recientes. Las categorías concretas y campos completos se especificarán antes de inventario.
 
@@ -67,6 +68,7 @@ Objetivo: operar con una concesionaria, validando el flujo comercial completo y 
 ## 5. Consultas y reparto
 
 - Formulario obligatorio antes de WhatsApp: nombre, teléfono y e-mail, validados en cliente y backend, sin verificar titularidad.
+- Una consulta es una entrada de seguimiento comercial, con origen web, presencial o telefónico. Vendedor, Administrador y Dueño pueden registrar consultas manuales; quedan asignadas a quien las registra, sin utilizar ni avanzar el reparto automático web. La carga manual exige nombre y teléfono; el e-mail es opcional. Puede utilizar un contacto existente o crear uno nuevo, sin sobrescribir automáticamente datos previos ni habilitar acceso al historial ajeno por coincidencia de teléfono.
 - Teléfonos internacionales admitidos, priorizando Argentina y evitando fricción innecesaria.
 - Contacto reconocido por teléfono normalizado; una persona puede tener varias consultas con seguimiento independiente.
 - Una consulta activa puede reunir varios vehículos de interés sin crear automáticamente nuevas consultas ni reservas; conserva un responsable comercial. El vendedor puede agregar vehículos de interés a sus propias consultas activas; al agregarlos deben estar disponibles en ese momento. Si luego otra consulta reserva uno, permanece registrado como interés, pero deja de estar disponible para reservarlo mientras dure esa reserva. Desde la consulta se puede reservar cualquier vehículo de interés que siga Disponible, aunque no sea el vehículo de origen; la reserva identifica consulta, contacto y vehículo concreto. Solo puede haber una reserva activa por consulta; para cambiar de vehículo se cancela primero la anterior y se conserva el historial. Cada visita identifica un vehículo concreto; la atribución comercial por vehículo se define en estadísticas.
@@ -97,9 +99,12 @@ Objetivo: operar con una concesionaria, validando el flujo comercial completo y 
 - La consulta con reserva activa puede pasar a Venta concretada para iniciar revisión administrativa, pero no a Cerrada sin venta hasta cancelar la reserva. Cuando un vendedor reporta Venta concretada se crea una tarea pendiente para Dueño/Administrador. Si confirma la venta, finaliza la reserva y cambia expresamente el vehículo a Vendido; si determina que no hubo venta, cancela cualquier reserva activa y corrige la consulta a Cerrada sin venta. Ambos caminos resuelven la tarea, preservan historial y no cierran otras consultas.
 - Si se confirma la venta de uno de varios vehículos de interés, esa consulta termina en Venta concretada para el vehículo vendido. Los demás intereses quedan en su historial; no generan ventas ni se cierran consultas de otras personas.
 - El vendedor puede reabrir sus consultas Cerrada sin venta, conservando historial. Reabrir Venta concretada corresponde únicamente a Dueño o Administrador. Toda reapertura vuelve a En seguimiento y no cambia la disponibilidad del vehículo.
+- Una consulta con revisión de venta pendiente no puede reabrirse: Dueño/Administrador debe confirmar o rechazar primero esa revisión. T5 no permite revertir ventas confirmadas; reabrir solo retoma el seguimiento y conserva el vehículo Vendido y el historial de venta.
+- Toda venta exige una consulta vinculada y confirmación explícita de Dueño/Administrador, incluidas las ventas presenciales registradas manualmente. No se permite crear ni marcar un vehículo Vendido directamente desde inventario, evitando omitir el contacto y el historial comercial.
+- El bloqueo interno impide reportar y confirmar una venta hasta que Dueño/Administrador desbloquee el vehículo explícitamente; se verifica tanto al reportar como al confirmar.
 - No se reasignan consultas cerradas directamente. Si se retoma el seguimiento, primero se reabre según los permisos anteriores y después Dueño/Administrador puede reasignarla a una persona elegible, conservando historial.
-- Solo puede existir una reserva activa por vehículo y, si está vinculada, una por consulta. Reservar desde una consulta activa propia exige que el vehículo concreto figure entre sus intereses, siga Disponible y la consulta no tenga otra reserva activa; vincula esa consulta, su contacto y el vehículo a la reserva y cambia la disponibilidad a Reservado en una operación atómica. Intentos concurrentes de reservar el mismo vehículo o de crear una segunda reserva para la consulta se rechazan sin cambios parciales. Dueño y Administrador también pueden gestionar reservas manualmente; sin señas, pagos ni vencimiento automático.
-- La reserva iniciada por vendedor siempre queda vinculada a su consulta. Ese vendedor puede cancelarla mientras la consulta siga asignada a él y la reserva continúe activa; la cancelación libera el vehículo a Disponible y conserva el historial. No puede cancelar reservas de otros. Dueño y Administrador también pueden cancelarlas; si inician una reserva manualmente, vincular una consulta existente sigue siendo opcional cuando corresponda.
+- Solo puede existir una reserva activa por vehículo y una por consulta. Toda reserva comercial identifica obligatoriamente una consulta, su contacto y el vehículo concreto. Reservar desde una consulta activa propia exige que el vehículo figure entre sus intereses, siga Disponible y habilitado para la venta y la consulta no tenga otra reserva activa; cambia la disponibilidad a Reservado en una operación atómica. Intentos concurrentes de reservar el mismo vehículo o de crear una segunda reserva para la consulta se rechazan sin cambios parciales. Vendedor, Dueño y Administrador pueden registrar manualmente la consulta y continuar con la reserva; sin señas, pagos ni vencimiento automático.
+- La reserva iniciada por vendedor siempre queda vinculada a su consulta. Ese vendedor puede cancelarla mientras la consulta siga asignada a él y la reserva continúe activa; la cancelación libera el vehículo a Disponible y conserva el historial. No puede cancelar reservas de otros. Dueño y Administrador también pueden cancelarlas. Ya no se admiten reservas comerciales sin consulta vinculada.
 - Visita solicitada desde ficha con fecha/hora preferidas dentro del horario de atención; crea consulta con visita vinculada y usa el mismo reparto.
 - Desde una consulta activa con varios vehículos de interés se puede solicitar una visita para uno de ellos: la visita registra ese vehículo y queda vinculada a la consulta existente, sin crear otra consulta ni reservar automáticamente el vehículo.
 - Vendedor confirma o reprograma después de contactar. No hay reserva automática ni disponibilidad en tiempo real.
@@ -114,7 +119,7 @@ Objetivo: operar con una concesionaria, validando el flujo comercial completo y 
 - Las vistas se cuentan por vehículo y no se duplican por vendedor elegible. Conservar atribución histórica de consultas y actividades.
 - Dueño/Administrador: visión global y por vendedor. Vendedor: solamente información autorizada.
 - Mes, trimestre, semestre, año y rango personalizado. Fórmulas y atribución temporal se definirán antes de construir los gráficos.
-- Sin carga manual de consultas externas: las métricas comerciales cubren oportunidades del sitio y su seguimiento, no toda la actividad del local.
+- Las métricas comerciales distinguen consultas web, presenciales y telefónicas. Las consultas manuales no se cuentan como conversiones del sitio; las fórmulas exactas siguen pendientes de definición.
 - Plantilla pública fija con nombre, logo, descripción, dirección, horarios, contactos, redes y colores configurables; sin editor visual.
 
 ## 8. Calidad, exclusiones y entrega
@@ -123,7 +128,7 @@ Objetivo: operar con una concesionaria, validando el flujo comercial completo y 
 - Permisos backend, migraciones, integridad PostgreSQL, pruebas según riesgo, sin cobertura global porcentual obligatoria.
 - Revisión de formato, lint, tipos, pruebas aplicables, compilación y UX móvil/escritorio, teclado y estados vacíos/carga/error.
 - Excluidos: suscripciones, facturación, pagos, integración de conversaciones de WhatsApp y editor visual.
-- Futuro: consultas presenciales/telefónicas con origen, hard delete conservando estadísticas, evolución multiagencia, continuidad comercial ampliada y revisión visual/compresión.
+- Futuro: hard delete conservando estadísticas, evolución multiagencia, continuidad comercial ampliada y revisión visual/compresión.
 - Orden: fundaciones y prueba de alojamiento → accesos/configuración → inventario → sitio público → consultas → CRM/visitas → estadísticas → piloto.
 - Costo cero es una restricción del MVP, no una garantía de cuotas suficientes. No contratar servicios pagos sin acuerdo.
 
@@ -142,6 +147,8 @@ No están aprobadas soluciones técnicas concretas para estos puntos:
 Resolver estos detalles proporcionalmente antes de implementar cada flujo; no inventar reglas comerciales para cerrar un pendiente.
 
 ## Historial de cambios aprobados
+
+- 2026-11-03: Se incorpora al MVP la consulta como entrada común de seguimiento web, presencial o telefónico. Las consultas manuales se asignan a quien las registra, exigen nombre y teléfono y permiten omitir e-mail. Toda reserva comercial requiere consulta y contacto. Se incorpora bloqueo interno exclusivo de Dueño/Administrador, rechazado mientras exista reserva activa; un vehículo bloqueado no se muestra en el sitio público y conserva su historial privado. Estas decisiones reemplazan la exclusión de consultas externas y la reserva administrativa sin consulta.
 
 - 2026-11-02: “Solo recibir consultas, el resto lo hace el admin o dueño únicamente. No asignemos autos, asignemos consultas. Es decir un auto puede tener muchas consultas y cada una va a un vendedor diferente, esto lógicamente si el vendedor no fue excluido.” Reemplaza la publicación directa, autoasignación y gestión de inventario por vendedores. Se conserva la continuidad de contacto previamente acordada, ahora basada en exclusiones.
 - 2026-11-02: Para el MVP se eliminan también las exclusiones de vendedores por vehículo. Todos los vendedores activos pueden recibir consultas de cualquier vehículo; Dueño/Administrador continúan como participantes comerciales opcionales por persona y vehículo. Una consulta activa puede registrar varios vehículos de interés, sujeto a definir el detalle de reservas y atribución.
