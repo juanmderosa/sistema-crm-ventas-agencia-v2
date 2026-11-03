@@ -67,6 +67,12 @@ pnpm is the approved package manager for the local workspace; use its pinned ver
 
 ## Later stages, not current implementation
 
+Approved T5 boundaries (2026-11-03): confirmed-sale reversal is excluded. Reopening resumes follow-up without changing Sold inventory or the confirmed-sale history. An inquiry with a pending sale review cannot reopen until Owner/Admin explicitly confirms or rejects that review. These decisions do not define statistical reversal formulas or authorize sales implementation beyond the approved baseline.
+
+Approved sale entry (2026-11-03): every sale, including a manually registered in-person sale, requires an inquiry and explicit Owner/Admin confirmation. Direct inventory creation or updates must not introduce Sold vehicles without that confirmation. This narrows the previously approved generic administrative availability editing; existing confirmed-sale history remains immutable. User confirmation: "Si, hagamoslo así."
+
+Approved blocked-sale eligibility (2026-11-03): internal blocking rejects both reporting and confirming a sale until Owner/Admin explicitly unblocks the vehicle. Recheck current eligibility during confirmation, even if it was enabled when reported. User confirmation: "Si, debe impedir hasta que se desbloquee."
+
 Approved reassignment clarification (2026-11-02): previous sellers lose inquiry-detail access after reassignment, but retain historical activity attribution in authorized statistics without a detail-access bypass. Administrative global access is unchanged.
 
 Approved CRM clarification (2026-11-02): sellers may reopen their own inquiries closed without sale; completed-sale inquiry reopening is Owner/Administrator-only. Every reopening returns to En seguimiento, preserves history and never changes vehicle availability as a side effect.
