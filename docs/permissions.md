@@ -11,6 +11,8 @@ Status: baseline derived from approved roles, not implemented policies. Owner an
 | Edit internal price and vehicle details | All vehicles | All vehicles | No |
 | Read inventory, vehicle details and internal prices | All vehicles | All vehicles | All vehicles, read-only; includes public price-on-request listings |
 | Reserve an Available vehicle listed as an interest on an active inquiry assigned to self | Yes | Yes | Yes, own inquiry only |
+| Register an in-person or telephone inquiry assigned to self | Yes | Yes | Yes |
+| Block or enable a vehicle for sale | Yes; reject blocking while actively reserved | Yes; reject blocking while actively reserved | No |
 | Cancel an active reservation linked to an inquiry currently assigned to self | Yes | Yes | Yes, own linked reservation only |
 | Mark sold and soft-delete a vehicle | Yes | Yes | No |
 | Configure optional Owner/Administrator participation when creating a vehicle | Yes | Yes | No |
@@ -41,6 +43,8 @@ Status: baseline derived from approved roles, not implemented policies. Owner an
 ## Enforcement invariants
 
 - Authenticate and authorize every privileged operation server-side. Never trust submitted roles, seller IDs or publication flags.
+- Every commercial reservation requires an inquiry, contact and specific interest vehicle. Manual inquiries belong initially to their registering active staff member, without web routing or rotation advancement. Manual name and phone are mandatory; email is optional. Existing contact matching never grants access to unrelated inquiries or silently overwrites identity data. No unlinked administrative reservation remains in scope.
+- Internal vehicle blocking is not a commercial reservation. Only Owner/Admin may block or enable sale eligibility; reject blocking an actively reserved vehicle without changing either record. Blocked vehicles are not visible on the public site, including direct public reads; private authorized inventory access and history remain available.
 - Vehicles are not assigned to sellers. Every active seller is eligible for inquiry routing on every vehicle in the MVP; no per-vehicle seller exclusions exist.
 - Owner/Administrator may receive inquiries when optionally enabled for the vehicle at creation and active. They join the same round robin and continuity eligibility as sellers, not a fallback pool. Commercial participation never changes their existing administrative permissions.
 - Administrative participation selects individual people, never an entire role automatically. No Owner/Administrator is preselected in a new vehicle form.
