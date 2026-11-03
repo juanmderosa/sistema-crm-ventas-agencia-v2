@@ -71,7 +71,7 @@ Approved reassignment clarification (2026-11-02): previous sellers lose inquiry-
 
 Approved CRM clarification (2026-11-02): sellers may reopen their own inquiries closed without sale; completed-sale inquiry reopening is Owner/Administrator-only. Every reopening returns to En seguimiento, preserves history and never changes vehicle availability as a side effect.
 
-- Manual entry of offline/telephone inquiries and origin attribution.
+- Manual inquiry entry and origin attribution moved into the approved MVP on 2026-11-03; T4a creation is implemented, while reservations, blocking and reporting remain pending.
 - Hard delete with preserved statistics; detailed retention/aggregation policy.
 - Multiagency operation and reconsideration of exclusive customer ownership.
 - Deeper UI customization and reconsideration of browser compression.
@@ -117,6 +117,16 @@ Implement creation as a service-only database operation first. Anonymous and aut
 ## Approved shared-contact conflict protection (2026-11-03)
 
 User confirmation: "Si, usemos esa protección contra sobreescrituras." Contact details and authorized phone corrections require the revision read by the caller. A stale edit is rejected atomically with a reload instruction; it never silently overwrites the winning edit. Every successful contact update increments the revision, including trusted direct updates. Existing role restrictions, submitted snapshots and phone-collision rejection remain unchanged. UI conflict handling and real phone parsing are separate pending work.
+
+## Approved unified CRM and reservation scope (2026-11-03)
+
+- A commercial inquiry is a shared follow-up entry with web, in-person or telephone origin. This supersedes the earlier exclusion of external inquiries.
+- Seller, Owner and Admin may create manual inquiries. The registering active staff member is the initial assignee; manual creation does not invoke or advance web rotation. User confirmation: "Si, quien la registra".
+- Manual entry requires name and phone, with optional email. User confirmation: "Me parece bien." The public web form keeps its existing required email. Reuse a matching contact without silently overwriting it; otherwise create the contact. Phone matching is not authorization to inspect unrelated history.
+- Every commercial reservation requires a linked inquiry and contact, including administrative manual entry. This supersedes the earlier optional inquiry link. Existing customers need not already have a contact record.
+- Internal vehicle blocking is separate from reservation and restricted to Owner/Admin. Reject blocking while an active reservation exists; resolve the reservation explicitly first. User confirmation: "Si, bloquiemos eso." Blocked inventory must not appear on the public site, while retaining private information and history. User confirmation: "Correcto, no debe mostrarse en el sitio."
+- Vehicle availability stays an independent administrative field (Available, Reserved, Sold). No rule requires Reserved to originate from a reservation: the approved baseline permits Owner/Admin inventory editing and never defines availability transitions, so that guard was deliberately not added. Reservation and blocking integrity is enforced in the other direction: reserving requires Available and sale-enabled inventory, and leaving Reserved, selling, soft-deleting or blocking a reserved vehicle is rejected until the reservation is resolved.
+- These are approved product changes, not implementation evidence. Existing T3 web behavior must remain covered by regression checks. T4a manual inquiry creation, T4b reservations and T4c internal blocking are implemented and verified in the database layer; public UI, visits, sales and reporting remain pending.
 
 ## Branching and integration workflow (2026-11-02)
 
