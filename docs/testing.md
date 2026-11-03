@@ -1,6 +1,6 @@
 # Verification strategy
 
-Status: strategy for business flows. The local stack now applies two versioned migrations and runs pgTAP suites. Verified: 36/36 database tests passing (21 identity, 15 inventory), pnpm frozen-lockfile installation, typechecks, production builds, loopback HTTP smoke checks, Supabase REST `200`, Auth health `200`, rejected public signup `422`, and real API enforcement (`/rest/v1/vehicles` `200 []` and `/rest/v1/profiles` `401` with the anon key).
+Status: strategy for business flows. The local stack now applies six versioned migrations. Current database suite: 275/275 assertions (118 prior assertions, 105 interest-operation and 52 contact-correction assertions). The inquiry slices had observed missing-table and missing-function RED failures. Previous verified checks: pnpm frozen-lockfile installation, typechecks, production builds, loopback HTTP smoke checks, Supabase REST `200`, Auth health `200`, rejected public signup `422`, and real API enforcement (`/rest/v1/vehicles` `200 []` and `/rest/v1/profiles` `401` with the anon key).
 
 ## Verified database checks
 
@@ -8,10 +8,19 @@ Status: strategy for business flows. The local stack now applies two versioned m
 |---|---|
 | `pnpm db:reset` | Reapply migrations and seed from scratch |
 | `pnpm db:test` | pgTAP suites under `supabase/tests` |
+| `pnpm exec supabase test db supabase/tests/0003_inquiries_test.sql` | Private inquiry/contact/interest read isolation and constraints |
 
 Current coverage: staff roles and profile isolation, seller mutation denial, anonymous signup rejection, last active Owner protection (demote, deactivate, delete), profile/auth-user foreign key, vehicle visibility for anonymous/active/inactive callers, draft and soft-delete isolation, inventory write denial for sellers, Owner/Admin inventory writes and the year constraint.
 
-No test yet covers inquiries, visits, reservations, sales or reporting, because those tables do not exist.
+The inquiry slice adds private contacts, inquiries and vehicle interests. Tests cover shared-contact isolation, inactive staff denial, Owner/Admin reads, anonymous denial, direct mutation denial, unique contact phone, international phone shape, creation sequence and retained submitted data. Phone shape is not real-world phone validation. The migration is applied locally with `pnpm exec supabase migration up`, which targets the local stack by default in the pinned CLI, without resetting existing data.
+
+T3a does not implement creation or mutations. T3b adds service-only creation with exact canonical-argument retry comparison, submitted-phone snapshot, initial interest/history, eligible continuity and per-vehicle rotation. Its observed RED was a missing function; after correcting internal execution privileges, 27 focused assertions pass. Independent overlapping sessions verified same-contact continuity, identical retries, distinct-contact rotation and conflicting-ID rejection. The subsequent bounded completion passed all seven missing checks (20 assertions), retained in `supabase/tests/0006_inquiry_submission_regression_test.sql`: removal/inactivity eligibility, Owner/Admin opt-in parity, pending-routing preservation, timestamp tie-break, Reserved acceptance and seven-table rejection hashes. Parent reran that file (20/20) and the complete suite (118/118). No broader feature or public end-to-end completion is implied.
+
+T3c adds authenticated, backend-authorized interest additions and revision-checked contact corrections, without broad table mutation grants. See [interest operations](inquiry-interests.md) and [contact corrections](contact-corrections.md). The new suites passed 157/157 on real local Supabase. An independent verifier found one composed details/submission/phone deadlock; one scoped advisory-before-row-lock correction passed its targeted independent recheck. `scripts/test-t3c-concurrency.ps1` retains overlapping-session regressions; its complete seven-scenario mode passed after the correction. Its disposable Auth scaffold proves concurrency, not real Auth integration. User consent allowed process-only script execution; no permanent policy changed.
+
+Real phone parsing and country-selector UI, a public endpoint with abuse protection/commercial contact response, visits, reservations, sales and reporting remain pending. Inquiry submission remains service-only; the new T3c operations require authenticated active staff and their documented row/role scope. Supported callers use READ COMMITTED transactions.
+
+Independent security probes are retained in `supabase/tests/0004_inquiry_security_probes.sql`: seven identities (including no profile and inactive seller), 63 denied writes with unchanged data hashes, restrictive history references, sequence support, unchanged vehicle availability and seven rejected phone shapes. The independent scratch pnpm runner failed due to incomplete copied dependencies; the verifier executed the SQL suites and probes successfully with local Docker `psql`. Parent reran the complete pnpm suite after adapting those probes to pgTAP. No baseline-only database or concurrent execution is claimed. Rolled-back identity sequence allocations can leave gaps; no customer fixture rows persist.
 
 On Windows, PowerShell resolves a `.ps1` shim before `.cmd`, so a disabled script-execution policy breaks `npm` but not pnpm when only the `.cmd` shim is installed. Use `pnpm.cmd` only as the fallback when a `.ps1` shim is present and blocked.
 
