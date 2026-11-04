@@ -73,6 +73,8 @@ Approved sale entry (2026-11-03): every sale, including a manually registered in
 
 Approved blocked-sale eligibility (2026-11-03): internal blocking rejects both reporting and confirming a sale until Owner/Admin explicitly unblocks the vehicle. Recheck current eligibility during confirmation, even if it was enabled when reported. User confirmation: "Si, debe impedir hasta que se desbloquee."
 
+T5b implementation (functional and independent verification complete; native review pending): confirmed sales use a private, one-record-per-vehicle ledger and explicit `resolve_sale_review(uuid,boolean)`. Successful reservations end as `completed`, with a confirming actor distinct from cancellation attribution; the enum extension is a separate migration before its first use. Rejection reuses `cancel_reservation` to preserve existing availability and historical behavior. Generic application-role Sold entry is rejected; database-owner maintenance/fixtures remain privileged SQL outside the API, not a new customer-facing import mechanism. No statistical formulas or reversal workflow are introduced.
+
 Approved reassignment clarification (2026-11-02): previous sellers lose inquiry-detail access after reassignment, but retain historical activity attribution in authorized statistics without a detail-access bypass. Administrative global access is unchanged.
 
 Approved CRM clarification (2026-11-02): sellers may reopen their own inquiries closed without sale; completed-sale inquiry reopening is Owner/Administrator-only. Every reopening returns to En seguimiento, preserves history and never changes vehicle availability as a side effect.
