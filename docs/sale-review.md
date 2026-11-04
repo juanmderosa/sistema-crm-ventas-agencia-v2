@@ -1,6 +1,6 @@
 # Sale reporting and administrative review
 
-Status: T5a reporting is independently verified and its native review acknowledged. T5b resolution is locally and independently verified; native review is pending. Reopening remains pending T5c. This is not a completed sales flow.
+Status: reporting, resolution and reopening are locally and independently verified. T5a/T5b native reviews are acknowledged; T5c native review is pending. No UI or real Auth/PostgREST end-to-end completion is claimed.
 
 ## Report a sale
 
@@ -28,7 +28,16 @@ Direct Owner/Admin inventory insert/update cannot introduce Sold without a confi
 
 Pending review blocks inquiry contact/responsibility changes and reopening, including trusted service-role updates. The resolution operation preserves vehicle → actor → inquiry lock order and resolves the review before correcting the inquiry status.
 
-## Approved remaining boundaries
+## Reopen an inquiry
+
+Authenticated active staff call `reopen_inquiry(p_inquiry_id uuid)`. The response is `{ "inquiry_id": "<uuid>", "status": "following_up" }`.
+
+- Sellers may reopen only their own `closed_without_sale` inquiries, including a sale explicitly rejected by Owner/Admin.
+- Owner/Admin may reopen either closed result, regardless of assignee. A `sale_reported` inquiry requires its administrative review to be resolved first; a pending report cannot be reopened.
+- Reopening appends an actor-attributed status-history row, preserves previous history and returns to `following_up`. It never changes availability, reservations, review decisions or confirmed-sale history; a confirmed vehicle stays Sold.
+- Active inquiries, repeated reopening of an already active inquiry and unauthorized callers are rejected without changes.
+
+## Scope boundaries
 
 Every confirmed sale must have an inquiry and explicit Owner/Admin confirmation. Direct application inventory Sold entry is blocked. Both reporting and confirmation reject internally blocked vehicles until explicitly unblocked.
 

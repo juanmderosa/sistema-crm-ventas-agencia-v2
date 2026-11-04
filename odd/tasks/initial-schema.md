@@ -2,7 +2,7 @@
 
 Objective: build the local PostgreSQL schema with versioned migrations and row-level security, verifying every authorization rule with pgTAP instead of trusting configuration.
 Branch: `feat/inquiries` from `develop` at `3ad0a5d`. Delivery strategy: `auto-chain`, feature-branch-chain into `feat/inquiries`, then `develop`; publication requires authorization.
-Current delivery: T4 completed locally on `feat/reservations` from `develop` at `1041146`; no push or merge. Behavior commits: `eefdc5f`, `adc8d5d`, `0981246`. Independent closure probes retained with final 677/677 database assertions; T5/T6 remain pending.
+Current delivery: T4 database complete and integrated before this session; T5 backend on local `feat/sales` has 1106/1106 assertions, independent proof complete and final native review pending. T6 remains pending; no UI, Auth HTTP or foundation completion claimed.
 T5 delivery: local `feat/sales` from `develop` at `390543c`, containing externally integrated T4. Inline dependent slices; auto-chain / feature-branch-chain retained. Forecast 900–1400 authored lines, including tests/docs; no push, merge, PR or .ps1 execution. Independent security/contracts/concurrency verification required before T5 completion.
 Test runner: `pnpm db:test` (`supabase test db`, pgTAP).
 
@@ -52,11 +52,17 @@ Test runner: `pnpm db:test` (`supabase test db`, pgTAP).
 | T4c | S20 | inline; shared inventory guards depend on reservation semantics | done | Commit `0981246`; `20261103140000_vehicle_sale_blocking.sql`; `0012_vehicle_sale_blocking_test.sql`; RED missing `set_vehicle_sale_blocked` and blocked rows still public; focused 58/58; suite 528/528 after `db:reset`; block-vs-reserve probes proved in both orders without deadlock; seven-scenario runner syntax-checked only; independent closure Met; Risk: items 2, 3 and 4 |
 | T5 | S10, S10a-S10d | inline; dependent behaviors cannot run in parallel | in progress | local feat/sales from 390543c; Risk: items 2, 3 and 4; independent verification at feature closure |
 | T5a | S10, S10d | inline; understood dependent sale-report entry | done | cdfbc1c; focused 50/50 + 84/84 + 13/13; suite 824/824; independent proof and five retained races passed; native consent granted, four lenses approved and exact acknowledgement burned authority |
-| T5b | S10, S10a, S10c-S10d | inline; depends on T5a | verified; native assessment pending | baseline cdfbc1c; focused 79/79 + retained 98/98, updated contract 33/33; suite1002/1002; independent proof completed, seven error differentials and47 public rows matched; retained ten-race runner passed; commit pending; Risk: items 2, 3 and 4 |
-| T5c | S10a-S10b | inline; depends on review lifecycle | pending | controlled reopening, preserved history and unchanged inventory; independent whole-T5 proof |
+| T5b | S10, S10a, S10c-S10d | inline; depends on T5a | done | 073cde5; focused79/79+98/98, suite1002/1002; independent proof and retained ten-race runner passed; native consent granted, approved/acknowledged; Risk: items2,3,4 |
+| T5c | S10a-S10b | inline; depends on review lifecycle | verified; native assessment pending | baseline073cde5; focused82/82+22/22, suite1106/1106; independent20cases/fourLockraces passed; retained runner passed; commit pending; Risk: items2,4 |
 | T6 | reporting | inline | pending | deferred metrics definitions |
 
 ## Log
+
+- L53: T5c independent PASS:20cases/fourLockraces, no correction. Retained0021(22/22), suite1106/1106 and four-race runner passed. Both disposableDBs/scratchdirs removed. T5 functional proof complete; final commit/native review pending. SQL/Python-only: no build/types/UI/AuthHTTP proof. No .ps1/push/merge/PR.
+
+- L52: T5c RED42883 then GREEN82/82; applied20261103170000_inquiry_reopening.sql, suite1084/1084. Newreopen_inquiry uses actor→inquiry locks, permits seller ownclosed-without-sale and Owner/Admin either resolvedresult, rejects pendingreviews and preserves inventory/ledger/history. Independent verification pending; no commit or T5completion yet.
+
+- L51: T5b commit073cde5; native consent granted, four lenses approved and exact acknowledgement burned authority for sha256:3234b435e63232484a3305bdb4e3705e74b94a6647bc6c38ba64752b6d20914e. Boundary073cde5. Non-blocking later advisory: retain pending contact/assignee guard assertions; no correction/review reopening. T5c starts inline; add only controlled reopening to following_up, no inventory mutation or confirmed-sale reversal.
 
 - L50 (user, 2026-11-04, verbatim): "Terminemos esta tarea". Continue the already-authorized T5 closure without broadening scope. T5b functional/independent proof is complete; parent retained and ran98pgTAP assertions and the ten-race Python runner. Both T5b disposable databases and both owned external scratch directories were removed after retention. Source checks: git diff --check and Python AST parse passed. Native mode remains on; local T5b work-unit commit and candidate-scoped review follow, then T5c reopening and final verification. No push/merge/PR or .ps1. A transient Engram readiness notice was checked with mem_doctor:10/10 operational checks okay; no repair or configuration changes.
 
