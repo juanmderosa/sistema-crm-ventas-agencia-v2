@@ -119,7 +119,18 @@ Objetivo: operar con una concesionaria, validando el flujo comercial completo y 
 - Las vistas se cuentan por vehículo y no se duplican por vendedor elegible. Conservar atribución histórica de consultas y actividades.
 - Dueño/Administrador: visión global y por vendedor. Vendedor: solamente información autorizada.
 - Mes, trimestre, semestre, año y rango personalizado. Fórmulas y atribución temporal se definirán antes de construir los gráficos.
-- Las métricas comerciales distinguen consultas web, presenciales y telefónicas. Las consultas manuales no se cuentan como conversiones del sitio; las fórmulas exactas siguen pendientes de definición.
+- Las métricas comerciales distinguen consultas web, presenciales y telefónicas. Las consultas manuales no se cuentan como conversiones del sitio; las relaciones exactas se definieron el 2026-11-04 (ver más abajo).
+- Definiciones aprobadas para estadísticas (2026-11-04): la visualización es la carga correcta de la ficha pública de un vehículo, no su aparición en el catálogo; solo el sitio público genera vistas y el panel privado nunca. Cada ficha cuenta una vez cada 24 horas móviles por navegador mediante un token aleatorio opaco sin datos personales; no se verifica identidad de visitantes. El filtro de bots por User-Agent conocido es imperfecto, aceptado como acotado para el MVP y sin precisión forense.
+- Atribución temporal: zona horaria fija `America/Argentina/Buenos_Aires` para todos los eventos; cortes a medianoche local para mes, trimestre, semestre y año; rangos personalizados inclusive por días en la misma zona.
+- Atribución por responsable: las actividades se atribuyen a quien las realizó y no cambian con la reasignación; el resultado de la consulta (venta confirmada o cierre sin venta) se atribuye al responsable vigente al momento de registrarse el resultado.
+- Cierres sin venta repetidos: cada cierre se cuenta como un evento de resultado, incluso si la consulta se reabrió y volvió a cerrarse. Cada evento se atribuye al responsable vigente al registrarse; reabrir no elimina cierres anteriores ni duplica el conteo de consultas.
+- Historial de cierres: cuando no exista una atribución histórica fiable, mostrar «responsable desconocido», sin reconstruirla a partir del responsable actual ni del administrador que registró el cierre. Los nuevos cierres conservan al responsable vigente al registrarse.
+- Relaciones y conversiones: mismos períodos para vistas y consultas web; relación por ficha = consultas web de origen en el vehículo ÷ vistas deduplicadas del vehículo; relación global = consultas web ÷ vistas totales del período. Se etiquetan como relación, nunca como causalidad. Las consultas manuales, presenciales y telefónicas se muestran como cantidades aparte y no entran en el numerador. Reservas, visitas y ventas confirmadas se muestran como cantidades absolutas.
+- Visitas: la solicitud de visita se cuenta como evento propio atribuido al vehículo concreto de la visita, sin contarlo como consulta ni conversión. Por decisión aprobada, la implementación de esta métrica se difiere de T6 al flujo de visitas, cuando exista su fuente de datos; se conserva la definición de conteo. Resultados y cancelaciones se definirán junto con el flujo de visitas y permanecen pendientes.
+- Acceso en estadísticas: el vendedor ve solo sus cifras (consultas donde fue responsable, resultados y actividades atribuidos, visitas/reservas/ventas atribuidas), nunca totales de la concesionaria, cifras de otros vendedores, comparaciones ni vistas por vehículo; en consultas reasignadas conserva la atribución histórica en sus cifras pero nunca el detalle. Dueño/Administrador ve visión global, por vehículo (incluidas vistas), por vendedor y comparaciones.
+- Conteo de consultas por responsable: cada consulta se cuenta una sola vez por cada responsable distinto, en el período de su primera asignación a esa persona. Volver a asignársela no suma otro conteo. Ejemplo: Ana en enero, Bruno en febrero y Ana nuevamente en marzo produce un conteo para Ana en enero y uno para Bruno en febrero, sin otro para Ana en marzo. El total global sigue siendo una consulta; los conteos por responsable no se suman para obtenerlo.
+- Consultas con historial de responsables incompleto: conservarlas en el total global y mostrarlas en un grupo separado como «historial de responsables incompleto», sin atribuirlas a períodos por persona mediante fechas no demostrables. Esta limitación del conteo de consultas no altera ventas o cierres con atribución fiable.
+- Reversiones: la venta se cuenta una sola vez al confirmar Dueño/Administrador; el MVP no contempla reversiones de venta. Una futura reversión requerirá definición previa.
 - Plantilla pública fija con nombre, logo, descripción, dirección, horarios, contactos, redes y colores configurables; sin editor visual.
 
 ## 8. Calidad, exclusiones y entrega
@@ -140,13 +151,16 @@ No están aprobadas soluciones técnicas concretas para estos puntos:
 - Entrega real de correos de invitación y recuperación con costo cero; creación inicial del Dueño.
 - Esquema inicial, matriz definitiva de operaciones sensibles y mapa de pantallas.
 - Desempates exactos de consultas con fechas idénticas.
-- Definición de visualización, tráfico interno/automatizado, ventana temporal y denominadores de conversiones.
 - Cancelación/resultados de visitas, excepciones de estados y política de eliminación/retención futura.
 - Límites de entrada de imágenes, tratamiento de logos, formatos soportados y normalización de teléfonos reales.
 
 Resolver estos detalles proporcionalmente antes de implementar cada flujo; no inventar reglas comerciales para cerrar un pendiente.
 
 ## Historial de cambios aprobados
+
+- 2026-11-04: Se difiere la implementación de la métrica de solicitudes de visita de T6 al flujo de visitas, sin alterar su definición aprobada ni diseñar anticipadamente dicho flujo.
+
+- 2026-11-04: Se aprueban las definiciones de estadísticas para T6: visualización pública con deduplicación de 24 horas móviles por navegador, sin identidad de visitantes y con filtro de bots conocidos; atribución temporal fija en America/Argentina/Buenos_Aires; actividades atribuidas a su ejecutor y resultados al responsable vigente; relaciones de conversión web del mismo período sin causalidad; solicitudes de visita como evento propio con resultados pendientes del flujo de visitas; alcance del vendedor limitado a sus cifras; ventas contadas una sola vez al confirmar, sin reversiones. Se resuelven los pendientes de definición de visualización, tráfico, ventana temporal y denominadores; siguen abiertos resultados/cancelaciones de visitas y política de retención.
 
 - 2026-11-03: Se incorpora al MVP la consulta como entrada común de seguimiento web, presencial o telefónico. Las consultas manuales se asignan a quien las registra, exigen nombre y teléfono y permiten omitir e-mail. Toda reserva comercial requiere consulta y contacto. Se incorpora bloqueo interno exclusivo de Dueño/Administrador, rechazado mientras exista reserva activa; un vehículo bloqueado no se muestra en el sitio público y conserva su historial privado. Estas decisiones reemplazan la exclusión de consultas externas y la reserva administrativa sin consulta.
 
