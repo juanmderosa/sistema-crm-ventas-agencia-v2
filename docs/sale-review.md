@@ -1,6 +1,6 @@
 # Sale reporting and administrative review
 
-Status: reporting, resolution and reopening are locally and independently verified. T5a/T5b native reviews are acknowledged; T5c native review is pending. No UI or real Auth/PostgREST end-to-end completion is claimed.
+Status: reporting, resolution and reopening are locally and independently verified; all three native reviews are approved and acknowledged. T5 database scope is complete. No UI or real Auth/PostgREST end-to-end completion is claimed.
 
 ## Report a sale
 

@@ -2,7 +2,7 @@
 
 Objective: build the local PostgreSQL schema with versioned migrations and row-level security, verifying every authorization rule with pgTAP instead of trusting configuration.
 Branch: `feat/inquiries` from `develop` at `3ad0a5d`. Delivery strategy: `auto-chain`, feature-branch-chain into `feat/inquiries`, then `develop`; publication requires authorization.
-Current delivery: T4 database complete and integrated before this session; T5 backend on local `feat/sales` has 1106/1106 assertions, independent proof complete and final native review pending. T6 remains pending; no UI, Auth HTTP or foundation completion claimed.
+Current delivery: T5 database backend complete on local `feat/sales`, 1106/1106 assertions, independent proof and native reviews acknowledged. T6 remains pending; no UI, Auth HTTP or foundation completion claimed.
 T5 delivery: local `feat/sales` from `develop` at `390543c`, containing externally integrated T4. Inline dependent slices; auto-chain / feature-branch-chain retained. Forecast 900–1400 authored lines, including tests/docs; no push, merge, PR or .ps1 execution. Independent security/contracts/concurrency verification required before T5 completion.
 Test runner: `pnpm db:test` (`supabase test db`, pgTAP).
 
@@ -50,13 +50,15 @@ Test runner: `pnpm db:test` (`supabase test db`, pgTAP).
 | T4a | S17-S19a | inline; dependent shared schema behavior, no writer trigger | done | `20261103120000_manual_inquiries.sql`; `0009_manual_inquiry_creation_test.sql`; RED missing `inquiry_origin`; focused 67/67; independent verifier no blocker (31 probes); retained `0010_manual_inquiry_verification_test.sql`; suite 374/374 after `db:reset`; Risk: items 1, 2, 3 and 4 |
 | T4b | S9, S17 | inline; depends on T4a | done | `20261103130000_reservations.sql`; `0011_reservations_test.sql`; RED missing `sale_enabled` and reservation types; focused 96/96; suite 470/470 after `db:reset`; five overlapping-session probes with exact expected results and terminal one-active-per-vehicle-and-inquiry; retained `scripts/test-t4b-concurrency.ps1` (syntax-checked only); Risk: items 2 and 4 |
 | T4c | S20 | inline; shared inventory guards depend on reservation semantics | done | Commit `0981246`; `20261103140000_vehicle_sale_blocking.sql`; `0012_vehicle_sale_blocking_test.sql`; RED missing `set_vehicle_sale_blocked` and blocked rows still public; focused 58/58; suite 528/528 after `db:reset`; block-vs-reserve probes proved in both orders without deadlock; seven-scenario runner syntax-checked only; independent closure Met; Risk: items 2, 3 and 4 |
-| T5 | S10, S10a-S10d | inline; dependent behaviors cannot run in parallel | in progress | local feat/sales from 390543c; Risk: items 2, 3 and 4; independent verification at feature closure |
+| T5 | S10, S10a-S10d | inline; dependent behaviors | done | cdfbc1c,073cde5,47a6fc0; suite1106/1106, independent proof and native approvals acknowledged; database layer only; Risk: items2,3,4 |
 | T5a | S10, S10d | inline; understood dependent sale-report entry | done | cdfbc1c; focused 50/50 + 84/84 + 13/13; suite 824/824; independent proof and five retained races passed; native consent granted, four lenses approved and exact acknowledgement burned authority |
 | T5b | S10, S10a, S10c-S10d | inline; depends on T5a | done | 073cde5; focused79/79+98/98, suite1002/1002; independent proof and retained ten-race runner passed; native consent granted, approved/acknowledged; Risk: items2,3,4 |
-| T5c | S10a-S10b | inline; depends on review lifecycle | verified; native assessment pending | baseline073cde5; focused82/82+22/22, suite1106/1106; independent20cases/fourLockraces passed; retained runner passed; commit pending; Risk: items2,4 |
+| T5c | S10a-S10b | inline; depends on review lifecycle | done | 47a6fc0; focused82/82+22/22, suite1106/1106; independent20cases/fourLockraces and retained runner passed; native approved/acknowledged; Risk: items2,4 |
 | T6 | reporting | inline | pending | deferred metrics definitions |
 
 ## Log
+
+- L54: T5 closed locally at47a6fc0; native consent granted, four lenses approved, exact acknowledgement burned sha256:0ed47849c5e6900b106935e9954b8d9e7106132ba5196c80d69b43d9feb6d01a. Behavior commits total1757authored lines; approved auto-chain retained. Non-blocking advisories recorded in docs/testing.md. T6/UI/AuthHTTP/build/types remain outside this database closure; no .ps1/push/merge/PR.
 
 - L53: T5c independent PASS:20cases/fourLockraces, no correction. Retained0021(22/22), suite1106/1106 and four-race runner passed. Both disposableDBs/scratchdirs removed. T5 functional proof complete; final commit/native review pending. SQL/Python-only: no build/types/UI/AuthHTTP proof. No .ps1/push/merge/PR.
 
