@@ -1,9 +1,10 @@
 # Reporting backend
 
 Status: database reporting backend functionally and independently verified.
-Administrative reader native review was declined for that candidate; own-reader
-native review is pending. Public view capture and bot filtering are
-integration-pending, so overall public measurement is not complete.
+Native review was declined for both reader candidates (administrative and
+own-only), each a candidate-scoped decision with no approval created. Public
+view capture and bot filtering are integration-pending, so overall public
+measurement is not complete.
 
 ## Own-only staff summary
 
