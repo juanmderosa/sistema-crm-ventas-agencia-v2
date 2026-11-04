@@ -60,7 +60,7 @@ pnpm is the approved package manager for the local workspace; use its pinned ver
 | Auth email and initial Owner | Provider delivery/quota not verified; bootstrap script and controlled partial-failure recovery approved but not implemented or executed |
 | Cloudflare proof | Not executed; deployment adapter and free runtime envelope unresolved |
 | Storage/transfer budget | Not measured; maximum planned photos can exceed quota |
-| Analytics definitions | Counting, retention, bot/internal traffic, rate formulas and attribution windows unresolved |
+| Analytics definitions | View counting, 24h dedup window, known-bot filter, temporal/person attribution, conversion denominators and visibility approved 2026-11-04; retention policy and visit results/cancellations still unresolved |
 | Contact updates | Retain existing fields, store discrepant public name/email on inquiry for review; reject phone-change collisions without data changes; shared-phone identities and merging excluded from MVP |
 | CI and local checks | Local typecheck/build and loopback HTTP smoke checks verified for shells; CI and real backend tests not configured |
 | Recovery | Backup/export/image recovery process and free-tier feasibility not validated |
@@ -87,6 +87,22 @@ Approved CRM clarification (2026-11-02): sellers may reopen their own inquiries 
 - Deeper UI customization and reconsideration of browser compression.
 
 Subscriptions, invoicing, payments, WhatsApp conversation integration and a visual site editor remain excluded. Future-work listing is not approval to implement those features.
+
+## Approved statistics definitions (2026-11-04)
+
+T6 reporting definitions were resolved before any implementation, with no formulas invented:
+
+- View event: successful load of the public vehicle-detail page, never catalog appearance; only the public site emits views, the private panel never.
+- Deduplication: one count per vehicle per opaque random browser token (no personal data) in a rolling 24-hour window; no visitor identity verification of any kind.
+- Automated traffic: server-side filter for known bot User-Agents, accepted as an imperfect MVP-scoped filter without forensic precision.
+- Temporal attribution: fixed timezone `America/Argentina/Buenos_Aires`; cuts at local midnight for month/quarter/semester/year; custom ranges inclusive by days in the same zone.
+- Person attribution: activities stay with whoever performed them and never move on reassignment; the inquiry outcome (confirmed sale or closed without sale) is attributed to the responsible person at the moment the outcome is recorded.
+- Conversion relations: same period on both sides; per-vehicle relation = originating web inquiries / deduplicated views of that vehicle; global relation = web inquiries / total views; labeled as relation, never causality. Manual, in-person and phone inquiries are shown as separate counts and never enter the numerator. Reservations, visits and confirmed sales are shown as absolute counts.
+- Visit metrics: visit requests count as their own event attributed to the concrete visit vehicle. User selected "Diferir al flujo de visitas (Recomendado)": implementation of this metric is deferred from T6 to the visit-flow feature because no visit source exists yet. The counting definition remains approved; results and cancellations stay pending until the visit flow is designed.
+- Visibility: sellers see only their own figures and never dealership totals, other sellers' figures, comparisons or per-vehicle views; reassigned inquiries keep historical attribution in figures but never detail access. Owner/Admin see global, per-vehicle (views included), per-seller and comparisons.
+- Reversals: a sale counts once at Owner/Admin confirmation; the MVP has no sale reversal, and any future reversal requires a prior definition.
+
+User confirmations (verbatim): "Si, cuando la ficha pública se carga correctamente."; "Si, estoy de acuerdo con la venta de 24hs móviles."; "El panel privado no requiere generación de métricas por vistas, eso es solo para el sitio público."; "No quiero verificiar identidad de visitantes"; "Está perfecta"; "Si, está bien". Full Spanish definitions: `docs/product-plan.md` section 7.
 
 ## Approved correction: inventory versus inquiry ownership (2026-11-02)
 
