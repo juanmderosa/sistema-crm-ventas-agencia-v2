@@ -90,6 +90,8 @@ Subscriptions, invoicing, payments, WhatsApp conversation integration and a visu
 
 ## Approved statistics definitions (2026-11-04)
 
+Implementation boundary approved during T6 continuation: user selected "Base de datos primero". T6a first implements server-only database ingestion and rolling deduplication. Successful public-detail loading and known-bot filtering remain integration-pending; neither an anonymous role nor a supplied page/UA claim proves provenance. See [database contract](vehicle-views.md). This delivery does not complete S21 or expand into the public site.
+
 T6 reporting definitions were resolved before any implementation, with no formulas invented:
 
 - View event: successful load of the public vehicle-detail page, never catalog appearance; only the public site emits views, the private panel never.
