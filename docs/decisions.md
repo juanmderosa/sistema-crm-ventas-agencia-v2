@@ -4,6 +4,8 @@ Date: 2026-11-02. Product approval is recorded in the conversation and project m
 
 ## Approved baseline
 
+Inquiry responsibility counting approved on 2026-11-04: count each inquiry once per distinct responsible person, in that person's first-assignment period. A return assignment adds no count. Global inquiry count remains one; staff counts are nonadditive. First-observed assignment timestamps must not be presented as historical first assignments when earlier history is incomplete.
+
 Historical closure attribution approved on 2026-11-04: preserve missing historical responsibility as unknown; do not backfill from the current assignee or recording actor. New closure events capture the responsible person when recorded. Distinguish a known unassigned inquiry from unavailable historical attribution.
 
 Reporting clarification approved on 2026-11-04: each closed-without-sale recording is a separate outcome event, including a later closure after reopening. Attribute each event to the responsible person when recorded. Reopening does not erase earlier closure events or increase the inquiry count. This does not change the once-only confirmed-sale rule.
