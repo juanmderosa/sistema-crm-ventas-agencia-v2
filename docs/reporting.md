@@ -1,7 +1,48 @@
 # Reporting backend
 
-Status: periods and source events implemented; aggregate readers and seller
-access pending. Public view capture and bot filtering are integration-pending.
+Status: periods, source events and Owner/Admin summary functionally verified;
+native candidate review and seller access pending. Public view capture and bot
+filtering are integration-pending.
+
+## Owner/Admin summary
+
+`public.get_reporting_summary(kind text, start date, end date default null)`
+returns JSON for active Owner/Admin only. It uses the calendar contract below;
+authorization is checked before dates or data. Only `authenticated` has function
+execution, with the internal role check rejecting sellers, inactive staff and
+identities without profiles. No new raw-table grants or policies are added.
+
+| Section | Counting grain |
+| --- | --- |
+| `totals` | Views, inquiry creations, reservation creations, sale reports, confirmed sales, closure events in the selected period |
+| `by_origin` | Web, in-person and phone counts shown separately, including zero rows |
+| `by_vehicle` | Views and inquiry origins; reservations/sales use their actual vehicle, not all interests; NULL vehicle retains manual inquiries without a vehicle |
+| `by_staff` | First assignments for complete histories, reservation/report performers, sale/closure responsible snapshots; no current-role or active-state filtering of history |
+| `inquiry_history_coverage` | Complete/incomplete responsibility history for inquiries **created** in the selected period |
+
+Global inquiry counts use creation time. Staff inquiry counts use each person's
+first-assignment time and exclude incomplete histories; their totals are not an
+additive breakdown of global inquiry creations. An older inquiry's incomplete
+assignment history does not suppress its independently reliable sale or closure.
+Unknown closure responsibility and known unassigned responsibility have distinct
+`attribution` buckets, both with NULL staff ID. Repeated closure events remain
+separate; reopening does not erase them. Cancellation/completion does not remove
+a reservation's creation count. Pending reports do not count as confirmed sales.
+
+`web_relation` globally and per vehicle returns numerator, denominator and value:
+web-origin inquiry creations divided by deduplicated view events in the same
+period. Zero views produce JSON NULL, not a fabricated zero relation. No-vehicle
+buckets have no per-ficha relation. `interpretation = relation_not_causality`
+is explicit. Staff comparisons are available only through this administrative
+reader; seller statistics will have a separate restricted contract.
+
+The response contains aggregates and staff/vehicle IDs, never contact fields,
+inquiry IDs, submitted snapshots, browser tokens, raw history or internal prices.
+It returns stable UTC period strings regardless of caller timezone. Empty staff
+and vehicle sections are arrays; empty totals are zero. Views represent stored
+events only: public capture integration is not claimed by this database reader.
+Visit metrics, contact clicks, UI charts and HTTP/Auth integration remain outside
+this slice. No arbitrary date-range caps or new commercial rules are introduced.
 
 ## Internal calendar normalizer
 
@@ -57,6 +98,15 @@ calling the helper. There is no public reporting endpoint in this slice.
 - `pnpm exec supabase test db supabase/tests/0024_reporting_period_test.sql`
 - `pnpm db:test`
 - `pnpm exec supabase test db supabase/tests/0025_inquiry_responsibility_test.sql`
+- `pnpm exec supabase test db supabase/tests/0026_reporting_summary_test.sql`
+- `python scripts/test-t6b4-independent.py t6b4verify_<base> t6b4verify_<candidate> <baseline-migrations-directory>`
+
+The administrative-reader probe freezes caller-provided baseline migrations and
+current migration bytes before creating two new disposable databases. It uses
+public commercial operations, synthetic fixtures, full data hashes, baseline
+function/ACL/policy comparisons and a recursive response-key allowlist. It never
+reads Git or deletes resources; the caller cleans up printed DB/scratch names.
+The Auth scaffold is not proof of deployed Auth or HTTP authorization.
 - `python scripts/test-t6b3-independent.py t6b3verify_<base> t6b3verify_<candidate> <baseline-migrations-directory>`
 
 The responsibility runner requires new disposable DB names and baseline migration
