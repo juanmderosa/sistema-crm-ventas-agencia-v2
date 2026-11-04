@@ -1,8 +1,33 @@
 # Reporting backend
 
-Status: periods, source events and Owner/Admin summary verified; native review
-declined for administrative reader candidate only. Seller access pending.
-Public view capture and bot filtering are integration-pending.
+Status: database reporting backend functionally and independently verified.
+Administrative reader native review was declined for that candidate; own-reader
+native review is pending. Public view capture and bot filtering are
+integration-pending, so overall public measurement is not complete.
+
+## Own-only staff summary
+
+`public.get_my_reporting_summary(kind text, start date, end date default null)`
+returns the authenticated active staff member's own `figures` and `by_origin`
+counts, using the same calendar contract. There is no staff selector: `auth.uid()`
+is the subject. Owner/Admin may also read their own figures through this endpoint.
+
+The five figures are `inquiries_first_assigned`, `reservations_created`,
+`sale_reports`, `confirmed_sales` and `closures_without_sale`. Each source is
+filtered by the viewer's historical responsibility or performed activity before
+aggregation. Current inquiry ownership does not replace historical attribution.
+Formerly assigned inquiries remain protected by existing RLS: aggregate counts
+do not grant access to their details. Unknown/unassigned outcomes cannot be
+attributed to the viewer and are not exposed as global buckets here.
+
+`scope.subject = self` and `scope.inquiry_history = complete_from_creation_only`
+are static disclosure, not global incomplete-history counts. The response has
+only `period`, `figures`, `by_origin` and `scope`: no other people, staff/vehicle
+IDs, global totals/coverage, comparisons, views, web relations or raw details.
+Origins include only the viewer's own figures. Sellers still cannot call the
+administrative endpoint. Inactive/non-staff callers are denied before date
+validation; anonymous/service roles have no direct function execution grant.
+No existing function, table policy or raw-table privilege is changed.
 
 ## Owner/Admin summary
 
@@ -99,6 +124,16 @@ calling the helper. There is no public reporting endpoint in this slice.
 - `pnpm db:test`
 - `pnpm exec supabase test db supabase/tests/0025_inquiry_responsibility_test.sql`
 - `pnpm exec supabase test db supabase/tests/0026_reporting_summary_test.sql`
+- `pnpm exec supabase test db supabase/tests/0027_my_reporting_summary_test.sql`
+- `python scripts/test-t6c-independent.py t6cverify_<base> t6cverify_<candidate> <baseline-migrations-directory>`
+
+The own-reader probe uses new disposable databases, frozen migration copies and
+exclusive evidence files under printed external scratch. It exercises real
+commercial operations, original RLS, exact recursive own-response keys, unchanged
+public-data hashes and entire-response isolation from unrelated staff activity.
+It checks populated administrative self-use, explicit origin counts, own unknown
+and unassigned outcome exclusion, and temp-function spoof resistance. No Git
+reads or automatic resource deletion; the caller owns cleanup.
 - `python scripts/test-t6b4-independent.py t6b4verify_<base> t6b4verify_<candidate> <baseline-migrations-directory>`
 
 The administrative-reader probe freezes caller-provided baseline migrations and
