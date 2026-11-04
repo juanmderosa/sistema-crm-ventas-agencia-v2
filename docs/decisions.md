@@ -73,11 +73,15 @@ Approved sale entry (2026-11-03): every sale, including a manually registered in
 
 Approved blocked-sale eligibility (2026-11-03): internal blocking rejects both reporting and confirming a sale until Owner/Admin explicitly unblocks the vehicle. Recheck current eligibility during confirmation, even if it was enabled when reported. User confirmation: "Si, debe impedir hasta que se desbloquee."
 
+T5b implementation (functional/independent verification complete; native review approved and acknowledged): confirmed sales use a private, one-record-per-vehicle ledger and explicit `resolve_sale_review(uuid,boolean)`. Successful reservations end as `completed`, with a confirming actor distinct from cancellation attribution; the enum extension is a separate migration before its first use. Rejection reuses `cancel_reservation` to preserve existing availability and historical behavior. Generic application-role Sold entry is rejected; database-owner maintenance/fixtures remain privileged SQL outside the API, not a new customer-facing import mechanism. No statistical formulas or reversal workflow are introduced.
+
+T5c implementation (functional/independent verification complete; native review approved and acknowledged): `reopen_inquiry(uuid)` uses the existing actor-profile → inquiry lock-order suffix and performs no inventory access or mutation. Seller reopening is limited to their own closed-without-sale inquiry; Owner/Admin may also reopen a resolved sale. Every successful reopening appends history and returns to follow-up, preserving the confirmed-sale ledger and Sold availability. Pending review must resolve first. No reassignment API or reversal operation is introduced.
+
 Approved reassignment clarification (2026-11-02): previous sellers lose inquiry-detail access after reassignment, but retain historical activity attribution in authorized statistics without a detail-access bypass. Administrative global access is unchanged.
 
 Approved CRM clarification (2026-11-02): sellers may reopen their own inquiries closed without sale; completed-sale inquiry reopening is Owner/Administrator-only. Every reopening returns to En seguimiento, preserves history and never changes vehicle availability as a side effect.
 
-- Manual inquiry entry and origin attribution moved into the approved MVP on 2026-11-03; T4a creation is implemented, while reservations, blocking and reporting remain pending.
+- Manual inquiry entry and origin attribution moved into the approved MVP on 2026-11-03; T4 creation/reservations/blocking and T5 sales are verified in the database layer. Public integration, visits and reporting remain pending.
 - Hard delete with preserved statistics; detailed retention/aggregation policy.
 - Multiagency operation and reconsideration of exclusive customer ownership.
 - Deeper UI customization and reconsideration of browser compression.
@@ -132,7 +136,7 @@ User confirmation: "Si, usemos esa protección contra sobreescrituras." Contact 
 - Every commercial reservation requires a linked inquiry and contact, including administrative manual entry. This supersedes the earlier optional inquiry link. Existing customers need not already have a contact record.
 - Internal vehicle blocking is separate from reservation and restricted to Owner/Admin. Reject blocking while an active reservation exists; resolve the reservation explicitly first. User confirmation: "Si, bloquiemos eso." Blocked inventory must not appear on the public site, while retaining private information and history. User confirmation: "Correcto, no debe mostrarse en el sitio."
 - Vehicle availability stays an independent administrative field (Available, Reserved, Sold). No rule requires Reserved to originate from a reservation: the approved baseline permits Owner/Admin inventory editing and never defines availability transitions, so that guard was deliberately not added. Reservation and blocking integrity is enforced in the other direction: reserving requires Available and sale-enabled inventory, and leaving Reserved, selling, soft-deleting or blocking a reserved vehicle is rejected until the reservation is resolved.
-- These are approved product changes, not implementation evidence. Existing T3 web behavior must remain covered by regression checks. T4a manual inquiry creation, T4b reservations and T4c internal blocking are implemented and verified in the database layer; public UI, visits, sales and reporting remain pending.
+- Existing T3 web behavior remains covered by regression checks. T4a manual inquiry creation, T4b reservations, T4c internal blocking and T5 sales are implemented and verified in the database layer; public UI, visits and reporting remain pending. Product approval alone is not implementation evidence; observed proof is recorded in docs/testing.md.
 
 ## Branching and integration workflow (2026-11-02)
 

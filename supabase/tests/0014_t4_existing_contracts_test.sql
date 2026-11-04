@@ -60,6 +60,7 @@ select is(pg_temp.snap(),(select h from before_denied_transfer),'denied seller r
 select is((select count(*)::integer from inquiry_assignment_history),1,'generic reassignment retains existing history');
 select 'DIFF:assignment:'||jsonb_build_array((select assignee_id from inquiries),(select count(*) from inquiry_assignment_history))::text;
 -- Both administrative roles retain generic inventory updates without reservation.
+-- T5 intentionally replaces direct Sold entry with inquiry-linked confirmation.
 select set_config('request.jwt.claim.sub',md5('diff.actor.1')::uuid::text,true);
 set local role authenticated;
 update vehicles set model='Owner edit',availability_status='reserved',publication_status='draft' where id=md5('diff.car')::uuid;
@@ -71,12 +72,14 @@ select is((select count(*)::integer from vehicles),0,'draft generic update hides
 reset role;
 select set_config('request.jwt.claim.sub',md5('diff.actor.2')::uuid::text,true);
 set local role authenticated;
-update vehicles set model='Admin edit',availability_status='sold',publication_status='published' where id=md5('diff.car')::uuid;
-select is((select model||'|'||availability_status||'|'||publication_status from vehicles),'Admin edit|sold|published','Admin generic inventory update');
+select throws_ok($$update vehicles set availability_status='sold' where id=md5('diff.car')::uuid$$,
+  '22023','confirm an inquiry sale before marking the vehicle Sold','Admin cannot bypass sale confirmation');
+update vehicles set model='Admin edit',availability_status='available',publication_status='published' where id=md5('diff.car')::uuid;
+select is((select model||'|'||availability_status||'|'||publication_status from vehicles),'Admin edit|available|published','Admin generic non-sale inventory update');
 reset role;
 select set_config('request.jwt.claim.sub','',true);
 set local role anon;
-select is((select count(*)::integer from vehicles),1,'published Sold informative page remains readable');
+select is((select count(*)::integer from vehicles),1,'published inventory remains publicly readable');
 reset role;
 create temp table before_denied_inventory as select pg_temp.snap() h;
 select set_config('request.jwt.claim.sub',md5('diff.actor.3')::uuid::text,true);
