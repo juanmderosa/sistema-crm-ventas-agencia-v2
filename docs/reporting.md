@@ -1,8 +1,8 @@
 # Reporting backend
 
-Status: periods, source events and Owner/Admin summary functionally verified;
-native candidate review and seller access pending. Public view capture and bot
-filtering are integration-pending.
+Status: periods, source events and Owner/Admin summary verified; native review
+declined for administrative reader candidate only. Seller access pending.
+Public view capture and bot filtering are integration-pending.
 
 ## Owner/Admin summary
 
