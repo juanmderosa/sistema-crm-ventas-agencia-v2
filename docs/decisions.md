@@ -29,6 +29,8 @@ Tradeoff: manual coordination avoids promising inventory or appointment capacity
 
 #### Approved exceptions and metric rules
 
+T3 clarification approved on 2026-11-05: final-to-final historical corrections remain allowed after inquiry closure or vehicle sale/blocking, with a reason and audit history. Active inquiry and current vehicle eligibility are required to return to pending, not to correct historical outcomes. Initial Requested-to-Confirmed entry may also occur after the appointment time without changing it; future/in-hours rules still apply when rescheduling.
+
 These later approvals refine the normal final-state lifecycle above; final visits are not routinely rescheduled, but their erroneous state may be explicitly corrected.
 
 | Topic | Approved rule |

@@ -1,7 +1,8 @@
 # Visit backend foundation
 
-Status: T1 foundation, T2a private creation and T2b service-only public creation.
-Lifecycle, automatic cancellation, reporting integration and UI remain pending.
+Status: T1 foundation, T2a private creation, T2b service-only public creation and
+T3a state/correction operations. Rescheduling, automatic cancellation, reporting
+integration and UI remain pending. T3a native review is pending.
 
 ## Opening-hours configuration
 
@@ -108,7 +109,64 @@ including a known unassigned result when no staff member is eligible. This SQL
 contract is not a public HTTP endpoint: real phone validation, abuse protection,
 safe schedule delivery and the deferred form must precede browser exposure.
 
+## State management
+
+Authenticated current responsible staff or active Owner/Admin calls
+`set_visit_status(p_visit_id uuid, p_status visit_status, p_reason text default null)`.
+It returns `{ "visit_id": "..." }`; no customer or inquiry details are returned.
+Anonymous/service execution and direct table writes remain denied.
+
+| Current state | Allowed target | Condition |
+|---|---|---|
+| Requested | Confirmed, Cancelled | Confirmation may be late |
+| Confirmed | Attended, No-show | Appointment time reached |
+| Confirmed | Cancelled | No time restriction |
+| Final | Any different state | Nonblank correction reason |
+| Any | Same state | Authorized no-op; no history or timestamps changed |
+
+Final means Attended, Cancelled or No-show. Restoring Requested/Confirmed also
+requires an active inquiry, an eligible vehicle (Reserved/private unpublished
+allowed; Sold/blocked/deleted denied), and no other pending visit in the inquiry.
+Final-to-final historical corrections remain possible after closure or vehicle
+unavailability. State-only changes never move or revalidate the appointment
+against changed opening hours. Confirmed-to-Requested belongs to rescheduling,
+not this operation.
+
+Every actual transition atomically appends previous/new state and appointment,
+actor, reason and wall-clock timestamp. First finalization snapshots the inquiry
+assignee, not the actor; its timestamp and nullable assignee survive all later
+corrections and reactivation. A recorded unassigned result stays unassigned.
+Purpose, request attribution and original public/private creation intent remain
+unchanged. Normal transitions do not require a correction reason.
+
+The internal, non-executable-by-client `lock_managed_visit(uuid)` acquires vehicle,
+actor, inquiry, then visit locks and rechecks authorization after waiting. Inquiry
+locking serializes restoration against creation even across different vehicles.
+Use READ COMMITTED, as with existing creation operations. No automatic cross-flow
+cancellation, metrics, rescheduling or UI is included in this slice.
+
+Errors: `42501 visit access denied` for missing/inaccessible visits;
+`22023 invalid visit transition`, `correction reason is required`,
+`visit time has not been reached`, `inquiry is not active`,
+`vehicle does not accept visits`, or `inquiry already has a pending visit`.
+An invalid enum literal is rejected by PostgreSQL before the function executes.
+
+Rollback boundary: only the new `20261105140000_visit_states.sql` functions,
+their test and this state-management contract. Existing storage, data, RLS and
+creation functions are unchanged; never remove historical visit data to roll back.
+
 ## Verification
+
+State transitions: `pnpm exec supabase test db supabase/tests/0031_visit_state_test.sql`
+(45/45); full database regression 1513/1513 across 31 files. Missing-function RED
+was observed before applying only the new migration; no shared reset was used.
+Independent authorization/concurrency proof passed: 31 assertions, five real
+lock-wait/release races, private retry and supplemental accepted-only public retry
+with exact intent preservation. Parent repeated the retained runner successfully:
+`python scripts/test-visit-state-concurrency.py`. It creates a new owned local
+`verify_visits_states_*` database from the current schema and leaves it plus its
+external scratch for caller cleanup. It never resets the shared database.
+Native review remains pending. This is SQL-role proof, not real Auth/JWT HTTP.
 
 Public creation: `pnpm exec supabase test db supabase/tests/0030_public_visit_request_test.sql`
 (32/32); full database regression 1468/1468 across 30 files. Retained races:
