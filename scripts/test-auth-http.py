@@ -21,7 +21,6 @@ import sys
 import urllib.error
 import urllib.request
 import uuid
-from datetime import datetime, timedelta, timezone
 
 try:
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -35,7 +34,6 @@ TAG = 'auth' + uuid.uuid4().hex[:8]
 PASSWORD = secrets.token_urlsafe(18)
 PHONE_A = '+54911%09d' % int(TAG[4:12], 16)
 PHONE_B = '+54912%09d' % int(TAG[4:12], 16)
-START = (datetime.now(timezone.utc) - timedelta(days=1)).date().isoformat()
 RESULTS = []
 FAILURES = []
 RETAINED = []
@@ -142,6 +140,13 @@ def var(name):
 API = var('API_URL')
 ANON = var('ANON_KEY')
 SERVICE = var('SERVICE_ROLE_KEY')
+
+# The reporting calendar runs on America/Argentina/Buenos_Aires (docs/reporting.md).
+# Anchor on the database's own clock in that zone: the previous UTC date falls in
+# the wrong month on the first day of a month after 03:00 UTC, which would put a
+# just-created inquiry outside the requested period.
+START = sql("select to_char(current_timestamp at time zone "
+            "'America/Argentina/Buenos_Aires', 'YYYY-MM-DD');")
 
 # --- fixtures ---------------------------------------------------------------
 users = {}
@@ -264,6 +269,11 @@ row = sql("select id::text||'|'||coalesce(assignee_id::text,'none') from public.
 inquiry_id, assignee = (row.split('|') + [''])[:2] if row else ('', '')
 check('D web inquiry stored once and assigned to staff',
       bool(row) and assignee in (users['seller1'], users['seller2']), row)
+# Re-anchor on the stored inquiry's own local date: the figure checks below assert
+# that this inquiry falls inside the requested month, so its month must hold by
+# construction instead of depending on the wall clock while the runner executes.
+START = sql("select to_char(created_at at time zone 'America/Argentina/Buenos_Aires', "
+            "'YYYY-MM-DD') from public.inquiries where submission_id = '%s';" % SUBMISSION)
 code, body = rpc('submit_inquiry', SERVICE, {
     'p_submission_id': SUBMISSION, 'p_vehicle_id': V_PUB, 'p_phone': PHONE_A,
     'p_name': 'Auth Probe', 'p_email': 'authprobe@example.com'}, key=SERVICE)

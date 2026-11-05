@@ -1,6 +1,6 @@
 # Verification strategy
 
-Status: strategy for business flows. The local stack now applies thirteen versioned migrations. Current database suite: 1106/1106 assertions across twenty-one files (1002 T5b assertions plus 82 reopening and 22 independent-reopening assertions). The inquiry and sale slices had observed missing-table and missing-function RED failures. Previous verified checks: pnpm frozen-lockfile installation, typechecks, production builds, loopback HTTP smoke checks, Supabase REST `200`, Auth health `200`, rejected public signup `422`, and real API enforcement (`/rest/v1/vehicles` `200 []` and `/rest/v1/profiles` `401` with the anon key).
+Status: strategy for business flows. The local stack now applies nineteen versioned migrations. Current database suite: 1348/1348 assertions across twenty-seven files (the historical 1106/1106 across twenty-one files was the T5b-era total and is superseded). The inquiry and sale slices had observed missing-table and missing-function RED failures. Previous verified checks: pnpm frozen-lockfile installation, typechecks, production builds, loopback HTTP smoke checks, Supabase REST `200`, Auth health `200`, rejected public signup `422`, and real API enforcement (`/rest/v1/vehicles` `200 []` and `/rest/v1/profiles` `401` with the anon key).
 
 ## Verified Auth/PostgREST HTTP checks
 
