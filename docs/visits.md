@@ -1,7 +1,7 @@
 # Visit backend foundation
 
-Status: T1 foundation and T2a private creation. Public creation is the next T2b
-unit. Lifecycle, automatic cancellation, reporting integration and UI remain pending.
+Status: T1 foundation, T2a private creation and T2b service-only public creation.
+Lifecycle, automatic cancellation, reporting integration and UI remain pending.
 
 ## Opening-hours configuration
 
@@ -82,7 +82,38 @@ missing interest, ineligible vehicle, existing pending visit or invalid time
 return explicit `22023` errors. Failures roll back visit, history and intent
 together. READ COMMITTED transactions are required, as for existing inquiry RPCs.
 
+## Submit a public visit request through a trusted backend
+
+`submit_visit_request(p_submission_id uuid, p_vehicle_id uuid, p_phone text,
+p_name text, p_email text, p_scheduled_at timestamptz, p_purpose text default null)`
+is service-role-only and returns exactly `{"accepted":true}`. It does not expose
+inquiry, contact, assignee or visit identifiers. It reuses `submit_inquiry` for
+canonical input validation, contact preservation, continuity and round robin,
+then records the visit and initial history in the same transaction. Failure of
+visit validation or insertion rolls back all inquiry/contact/routing writes.
+Public requests require a published, sale-enabled, not Sold/deleted vehicle and
+a future appointment within opening hours; Reserved remains eligible.
+
+Retain the submission UUID and exact payload across retries. Stored original
+intent includes canonical contact fields, vehicle, timestamp and optional purpose.
+Matching retries remain accepted after subsequent changes of inventory, inquiry,
+schedule or visit state. Different data returns `22023`; an ordinary-inquiry UUID
+cannot be reused for a visit request or vice versa, even with identical contact
+fields. The ordinary RPC otherwise retains its existing behavior and grants;
+in particular, its preexisting treatment of blocked vehicles is not changed by
+the stricter eligibility rules for visits.
+
+The public history actor is null; request attribution is the routed assignee,
+including a known unassigned result when no staff member is eligible. This SQL
+contract is not a public HTTP endpoint: real phone validation, abuse protection,
+safe schedule delivery and the deferred form must precede browser exposure.
+
 ## Verification
+
+Public creation: `pnpm exec supabase test db supabase/tests/0030_public_visit_request_test.sql`
+(32/32); full database regression 1468/1468 across 30 files. Retained races:
+`python scripts/test-public-visit-concurrency.py verify_visits_<owned_empty_migrated_db>`.
+The disposable database must be empty and migrated; fixtures remain for caller cleanup.
 
 Focused command: `pnpm exec supabase test db supabase/tests/0028_visit_foundation_test.sql`.
 Full regression command: `pnpm db:test`.
