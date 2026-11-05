@@ -4,6 +4,54 @@ Date: 2026-11-02. Product approval is recorded in the conversation and project m
 
 ## Approved baseline
 
+### S21a visit-flow definition (2026-11-05)
+
+Status: product decisions approved; implementation has not started as part of this definition. The approved Spanish baseline is [product-plan.md, section 6](product-plan.md#6-crm-reservas-y-visitas). This documentation update does not authorize code implementation, deployment, publication or account creation.
+
+| Topic | Approved decision | Consequence |
+|---|---|---|
+| Delivery boundary | S21a is backend only: opening hours, visits, permissions, history, inquiry-closure effects and visit metrics, with flow tests | Public form and internal agenda remain a later delivery; backend readiness is not an end-user-ready feature |
+| Requested time | Customer requests a tentative date/time within opening hours; salesperson confirms after coordination | No automatic booking, real-time availability guarantee or automatic vehicle reservation |
+| Opening hours | Owner/Admin configures opening days and one or more intervals per day | No fixed appointment duration or slot capacity in the MVP; illustrative hours are not defaults |
+| Inquiry and vehicle link | Public vehicle-page requests create an inquiry through normal routing; requests from an existing active inquiry reuse it and identify an interest vehicle | Preserve the existing routing baseline and concrete vehicle attribution without duplicating an existing inquiry |
+| States | Requested, Confirmed, Attended, Cancelled and No-show; the last three are final | Rescheduling is a historical date/time change, not a state |
+| Management | Responsible salesperson manages visits of their inquiries; Owner/Admin manages any visit | No additional administrator approval; preserve change actor and timestamp |
+| Sequential visits | At most one pending visit (Requested or Confirmed) per inquiry, regardless of vehicle | After finalization, another visit may be created while the inquiry is active, retaining all prior visits |
+| Visit reason | Optional free text | Describe different sales-process instances without new CRM stages or a fixed reason catalog |
+| Rescheduling | Unlimited while Requested or Confirmed, always to a future time within opening hours | Agreed time leaves the visit Confirmed; an unagreed proposal leaves it Requested; finalized visits cannot be rescheduled |
+| Attendance outcomes | Staff manually records Attended or No-show only from Confirmed, once its scheduled time is reached | Time passing alone never records an outcome; cancellation is allowed from Requested or Confirmed |
+| Inquiry closure | Automatically cancel pending visits with reason «Consulta cerrada» | Already finalized visits remain unchanged |
+| Vehicle sold or removed | Cancel its pending visit and record the reason without automatically closing the inquiry | Other vehicle interests may remain relevant; Reserved alone does not cancel a visit and remains subject to availability |
+| Customer changes | Customer coordinates later cancellation/rescheduling with the salesperson; authorized staff records it | No customer portal or public visit-management links in the MVP |
+| Deferred interface | Public form and list agenda filtered by date/state; salesperson sees own-inquiry visits, Owner/Admin sees all with an additional salesperson filter; manage visits and open linked inquiry | No graphical calendar or automatic reminders in the MVP; UI is defined, not implemented by S21a |
+
+Tradeoff: manual coordination avoids promising inventory or appointment capacity the MVP does not manage. A single pending visit keeps the workflow sequential while retaining repeated visits for different sales-process instances.
+
+#### Approved exceptions and metric rules
+
+These later approvals refine the normal final-state lifecycle above; final visits are not routinely rescheduled, but their erroneous state may be explicitly corrected.
+
+| Topic | Approved rule |
+|---|---|
+| Opening-hours changes | Apply to new requests and rescheduling only; preserve existing visits without automatic changes or cancellation. Staff coordinates any affected appointment explicitly |
+| Internally blocked vehicle | Reject new visits and cancel pending visits with reason «Vehículo bloqueado», without closing the inquiry; unblocking does not automatically restore visits |
+| Private versus public eligibility | Staff may schedule visits for unpublished vehicles if sale-enabled, not Sold and not soft-deleted, respecting inquiry/interest rules. Publication is required for public requests, not private visit management |
+| Inquiry reopening | Do not restore cancelled visits automatically. Staff may explicitly create another visit or correct the prior one, respecting vehicle eligibility and the single pending visit limit |
+| State corrections | Responsible salesperson and Owner/Admin may correct a finalized state, including returning it to Requested or Confirmed if the inquiry is active and has no other pending visit. Correction does not bypass vehicle eligibility |
+| Correction history | Require a brief reason for corrections from a final state and retain previous/new state, actor and timestamp. This requirement does not apply to normal workflow transitions; it is separate from the optional visit purpose |
+| Past appointment time | Correction may restore Confirmed even after its scheduled time; this does not change the appointment date. Rescheduling still requires a future time within opening hours |
+| Request counts | Count each visit once as a request, attributed to its concrete vehicle; rescheduling and corrections do not create requests or inquiries |
+| Outcome counts | Report only the current outcome per visit, not each edit as an additional result. No-show corrected to Attended moves the count between groups; history retains both. Returning to pending removes the final-outcome count until finalized again |
+| Reporting periods | Requests use creation date; outcomes use scheduled visit date, not recording date, in America/Argentina/Buenos_Aires. Later outcome corrections update that scheduled-date period |
+| Responsibility attribution | Request belongs to the inquiry responsible person at creation; outcome belongs to the inquiry responsible person when first recorded. Later corrections, reassignments and reactivation followed by finalization preserve the first outcome attribution |
+| Unassigned visits | Include requests and cancellations without an assignee in dealership totals under «Sin responsable»; never credit the recording administrator as a substitute |
+
+Accepted reporting tradeoff: request and outcome may belong to different people, so their counts do not establish an individual conversion rate. Late outcome recording after reassignment credits the responsible person at recording, not necessarily the person who physically attended. The actual-attendee field and selector were considered and not selected for this version. Attribution does not grant access to inquiry details after reassignment; existing reporting visibility remains unchanged.
+
+Local task branch: `feat/visits`, created from `develop` at `1bbefb3` at the user's request. This records local preparation only, not implementation, a commit or remote publication. Operational exceptions and visit metric decisions identified in this definition are now approved; backend design, implementation and verification remain pending.
+
+This section supersedes older statements that visit results/cancellations and their statistical treatment remain undefined. Historical entries below describe their original date, not proof that S21a is implemented.
+
 Incomplete inquiry-history reporting approved on 2026-11-04: keep inquiries without complete responsibility history in exact global creation counts and an explicit incomplete-history coverage bucket. Exclude them from per-person first-assignment-period inquiry counts rather than substituting first-observed dates. This does not exclude their independently reliable reservation, sale or closure events.
 
 Inquiry responsibility counting approved on 2026-11-04: count each inquiry once per distinct responsible person, in that person's first-assignment period. A return assignment adds no count. Global inquiry count remains one; staff counts are nonadditive. First-observed assignment timestamps must not be presented as historical first assignments when earlier history is incomplete.
@@ -68,7 +116,7 @@ pnpm is the approved package manager for the local workspace; use its pinned ver
 | Auth email and initial Owner | Provider delivery/quota not verified; bootstrap script and controlled partial-failure recovery approved but not implemented or executed |
 | Cloudflare proof | Not executed; deployment adapter and free runtime envelope unresolved |
 | Storage/transfer budget | Not measured; maximum planned photos can exceed quota |
-| Analytics definitions | View counting, 24h dedup window, known-bot filter, temporal/person attribution, conversion denominators and visibility approved 2026-11-04; retention policy and visit results/cancellations still unresolved |
+| Analytics definitions | View counting, 24h dedup window, known-bot filter, temporal/person attribution, conversion denominators and visibility approved 2026-11-04; visit results/cancellations defined in S21a above on 2026-11-05, implementation pending; retention policy unresolved |
 | Contact updates | Retain existing fields, store discrepant public name/email on inquiry for review; reject phone-change collisions without data changes; shared-phone identities and merging excluded from MVP |
 | CI and local checks | Local typecheck/build and loopback HTTP smoke checks verified for shells; CI and real backend tests not configured |
 | Recovery | Backup/export/image recovery process and free-tier feasibility not validated |
