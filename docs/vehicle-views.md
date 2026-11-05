@@ -5,7 +5,7 @@ known-bot User-Agent filter are not integrated. This is not complete S21 proof.
 
 ## Trusted-server contract
 
-`public.record_vehicle_view(vehicle_id uuid, browser_token uuid) -> boolean`
+`public.record_vehicle_view(p_vehicle_id uuid, p_browser_token uuid) -> boolean`
 is executable only by `service_role`. Neither anonymous callers nor authenticated
 staff can invoke it. The future public server must call it only after a successful
 public detail-page load and known-bot filtering. Never expose privileged keys in
@@ -47,6 +47,9 @@ wall time catches up; no speculative recovery or identity verification is added.
 - `pnpm exec supabase test db supabase/tests/0022_vehicle_views_test.sql`
 - `pnpm db:test`
 - `python scripts/test-t6a-independent.py t6verify_<base> t6verify_<candidate> <baseline-migrations-directory>`
+- `python scripts/test-auth-http.py` — real PostgREST calls: `service_role` records
+  and deduplicates a view over HTTP, while `anon` and `authenticated` receive
+  permission denial; see [auth-http](auth-http.md).
 
 The focused test rolls back synthetic fixtures. The retained independent runner
 creates two new explicitly named disposable databases, applies caller-provided

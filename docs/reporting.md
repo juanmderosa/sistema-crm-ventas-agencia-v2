@@ -8,7 +8,7 @@ measurement is not complete.
 
 ## Own-only staff summary
 
-`public.get_my_reporting_summary(kind text, start date, end date default null)`
+`public.get_my_reporting_summary(p_kind text, p_start date, p_end date default null)`
 returns the authenticated active staff member's own `figures` and `by_origin`
 counts, using the same calendar contract. There is no staff selector: `auth.uid()`
 is the subject. Owner/Admin may also read their own figures through this endpoint.
@@ -32,7 +32,7 @@ No existing function, table policy or raw-table privilege is changed.
 
 ## Owner/Admin summary
 
-`public.get_reporting_summary(kind text, start date, end date default null)`
+`public.get_reporting_summary(p_kind text, p_start date, p_end date default null)`
 returns JSON for active Owner/Admin only. It uses the calendar contract below;
 authorization is checked before dates or data. Only `authenticated` has function
 execution, with the internal role check rejecting sellers, inactive staff and
@@ -72,13 +72,13 @@ this slice. No arbitrary date-range caps or new commercial rules are introduced.
 
 ## Internal calendar normalizer
 
-`public.reporting_period(kind text, start date, end date default null)` is an
+`public.reporting_period(p_kind text, p_start date, p_end date default null)` is an
 internal, data-free helper with no application-role execution grants.
 
 | Kind | Arguments | Result |
 | --- | --- | --- |
-| `month`, `quarter`, `semester`, `year` | Required anchor in `start`; `end` must be NULL | Calendar period containing the anchor |
-| `custom` | Required inclusive `start` and `end` | Both local days included |
+| `month`, `quarter`, `semester`, `year` | Required anchor in `p_start`; `p_end` must be NULL | Calendar period containing the anchor |
+| `custom` | Required inclusive `p_start` and `p_end` | Both local days included |
 
 Returns one row: inclusive `local_start`/`local_end` dates, `start_at` inclusive,
 `end_at` exclusive and `timezone_name = America/Argentina/Buenos_Aires`.
@@ -114,7 +114,7 @@ Global count remains one; staff counts are not additive. Assignment is not
 evidence of a performed activity. This capture adds no reassignment RPC or
 changes to eligibility, RLS or existing pending-review/reservation guards.
 
-Invalid kind, missing dates, reversed custom ranges, ignored calendar end dates,
+Invalid `p_kind`, missing dates, reversed custom ranges, ignored calendar end dates,
 infinite dates and unrepresentable timestamp boundaries return SQLSTATE `22023`
 with an actionable message. PostgreSQL rejects malformed typed dates before
 calling the helper. There is no public reporting endpoint in this slice.
@@ -127,6 +127,8 @@ calling the helper. There is no public reporting endpoint in this slice.
 - `pnpm exec supabase test db supabase/tests/0026_reporting_summary_test.sql`
 - `pnpm exec supabase test db supabase/tests/0027_my_reporting_summary_test.sql`
 - `python scripts/test-t6c-independent.py t6cverify_<base> t6cverify_<candidate> <baseline-migrations-directory>`
+- `python scripts/test-auth-http.py` — real GoTrue users, real JWTs and PostgREST
+  over loopback HTTP; see [auth-http](auth-http.md) for the verified exposure matrix.
 
 The own-reader probe uses new disposable databases, frozen migration copies and
 exclusive evidence files under printed external scratch. It exercises real

@@ -24,3 +24,7 @@ supabase/.temp/
 # Local tool caches and memory
 .engram/
 .atl/*.cache.json
+
+# Local Python tooling
+__pycache__/
+*.pyc
