@@ -2,7 +2,7 @@
 
 Status: T1 foundation, T2a private creation, T2b service-only public creation and
 T3a state/correction operations. Rescheduling, automatic cancellation, reporting
-integration and UI remain pending. T3a native review is pending.
+integration and UI remain pending. T3a verification and native review are complete.
 
 ## Opening-hours configuration
 
@@ -166,7 +166,9 @@ with exact intent preservation. Parent repeated the retained runner successfully
 `python scripts/test-visit-state-concurrency.py`. It creates a new owned local
 `verify_visits_states_*` database from the current schema and leaves it plus its
 external scratch for caller cleanup. It never resets the shared database.
-Native review remains pending. This is SQL-role proof, not real Auth/JWT HTTP.
+User-granted four-lens native review approved commit `e957e9e` without findings;
+exact acknowledgement consumed the review authority for `review-26b7bf31a3d343e8`.
+This is SQL-role proof, not real Auth/JWT HTTP.
 
 Public creation: `pnpm exec supabase test db supabase/tests/0030_public_visit_request_test.sql`
 (32/32); full database regression 1468/1468 across 30 files. Retained races:

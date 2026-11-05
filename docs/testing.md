@@ -4,6 +4,20 @@ Status: strategy for business flows. The local stack now applies twenty versione
 
 ## Verified public-capture checks
 
+S21a T3a closure: commit `e957e9e` adds state-only visit transitions and historical
+corrections. Missing-function RED, focused `0031_visit_state_test.sql` **45/45**,
+full database suite **1513/1513 across 31 files**. Independent S8/S9 proof passed:
+31 assertions, rejected-command full-public-data hashes, five observed lock/release
+races and original public/private retry preservation. Parent repeated retained
+`python scripts/test-visit-state-concurrency.py` successfully. Four owned test
+databases and two external scratch directories were removed. User-granted native
+four-lens review approved without findings; exact acknowledgement for
+`review-26b7bf31a3d343e8` returned `authority: burned`, consumed revision
+`sha256:34fabb5eb6c41615f7e4d6de0678f363b9587a08a3866220857e1b0cfac1cdba`.
+No shared reset, rescheduling, cross-flow cancellation, reporting or UI change.
+SQL-role proof only; real JWT HTTP was not exercised; build/typecheck are not
+applicable to this SQL/Python/documentation slice.
+
 S21a T2b closure: behavior commit `eb78f5a` (389 authored lines), functional and scoped independent proof complete; user granted native four-lens review, approved without blockers. Exact acknowledgement for `review-1c6bb01a7c591419` returned `authority: burned` at consumed revision `sha256:51819f7fef48580a064a8476eb3296599a4df06de7ff9af8c07f00869674fa19`. This supersedes pending-native wording below. One non-blocking later test improvement: require two non-null equal assignees in the retained same-phone concurrency assertion, since COUNT DISTINCT ignores NULL. It does not reopen the approved candidate. T2 creation is complete; lifecycle, cross-flow automatic cancellation, reporting integration, browser submission and UI remain pending. No push, PR or merge.
 
 S21a T2b functional/independent proof complete; native review pending. Missing-public-RPC RED observed, then 29/29 focused and 1465/1465 across 30 files after only `20261105130000_public_visit_requests.sql`, without shared reset. Initial independent partial proof was completed through the user-authorized bounded continuation: ordinary baseline/candidate normalized persisted effects match (canonical contacts, snapshots, origins, interests, rotation/continuity/unassigned and attribution ledgers); expiry after a real schedule-lock wait rejects with unchanged all-public-table hash; independent time/null/timezone/changed-timestamp and exact terminal ledger assertions pass. Earlier literal role denials, three injected insertion-failure rollbacks and real races stand. Parent retained `scripts/test-public-visit-concurrency.py` and observed all six waits/releases and exact accepted-only responses/terminal state; final focused **32/32**, full **1468/1468 across 30 files**. Historical foundation replay failures were baseline-identical Auth scaffold issues, not candidate regressions. Internal PostgreSQL CONTEXT line numbers changed; external ordinary messages, stdout and exits matched. No real JWT HTTP/build/typecheck claim.
