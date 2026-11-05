@@ -1,7 +1,7 @@
 # Visit backend foundation
 
-Status: S21a T1 foundation only. Visit creation, lifecycle, automatic cancellation,
-reporting integration and UI are not implemented by this migration.
+Status: T1 foundation and T2a private creation. Public creation is the next T2b
+unit. Lifecycle, automatic cancellation, reporting integration and UI remain pending.
 
 ## Opening-hours configuration
 
@@ -49,8 +49,38 @@ therefore remove former staff access without removing history.
 
 Direct application-role writes and broad service-role access are denied. The SQL
 database owner can create test fixtures; that is not an exposed application API.
-This foundation does not yet capture history automatically or enforce lifecycle
-transitions: those operations remain unavailable to application callers.
+Private creation records its initial history atomically. Subsequent lifecycle
+transitions and automatic cancellation remain unavailable to application callers.
+
+## Create a visit from an existing inquiry
+
+`create_inquiry_visit(p_submission_id uuid, p_inquiry_id uuid, p_vehicle_id uuid,
+p_scheduled_at timestamptz, p_purpose text default null)` is authenticated-only.
+The active responsible staff member or Owner/Admin may call it. It returns
+`{"visit_id":"<uuid>"}` for the new tentative visit and creates no inquiry,
+reservation or assignment/rotation change. The vehicle must already be an
+interest of the active inquiry; unpublished and Reserved vehicles are allowed,
+but Sold, blocked and soft-deleted vehicles are not.
+
+Generate one submission UUID per intentional creation, retaining it for technical
+retries. Exact original intent is stored in private `visit_creation_requests`;
+identical authorized retries return the original ID without adding history.
+Changed input returns `22023: visit submission ID already used with different input`.
+Every retry checks current access first: former assignees cannot recover visit
+details through an old key. Later schedule, availability or inquiry-status changes
+do not invalidate an otherwise authorized matching retry.
+
+New appointments must be future and within local opening-inclusive,
+closing-exclusive intervals. All lock waits precede the wall-clock check. Lock
+order is submission advisory, vehicle, actor profile, inquiry, schedule advisory.
+No additional profile lock is acquired after schedule locking. Times are compared
+as epoch values for retry intent, independently of the caller's session timezone.
+The internal schedule helper is not executable by application roles.
+
+Common errors: unauthorized access `42501: visit access denied`; inactive inquiry,
+missing interest, ineligible vehicle, existing pending visit or invalid time
+return explicit `22023` errors. Failures roll back visit, history and intent
+together. READ COMMITTED transactions are required, as for existing inquiry RPCs.
 
 ## Verification
 
