@@ -228,3 +228,7 @@ Every branch that reaches `origin` with a pull request carries that summary, not
 The model was reviewed and confirmed by the user (2026-11-02), with explicit reasons: `main` is the production line and must never receive half-tested work, continuous integration will be added on top of `develop`, and local experimentation stays away from production code.
 
 Reviewed tradeoff: with a single developer, `develop` adds one integration hop that `main` alone would not need, and it only returns its full value once automated checks and a deployment from `main` exist. The rule that keeps it safe in the meantime is that feature branches stay short and always return to `develop`; a branch that never comes back is dead work.
+
+## T3b rescheduling implementation (2026-11-05)
+
+Rescheduling reuses managed-visit locks followed by the existing opening-time helper, rather than duplicating authorization or scheduling rules. The explicit agreement boolean chooses Confirmed versus Requested. Exact valid retries are no-ops after current authorization and time validation; this is not immutable creation-request idempotency. Only appointment and status change; history records both old and new values, and creation/first-outcome attribution remains untouched. Existing functions and RLS are unchanged.

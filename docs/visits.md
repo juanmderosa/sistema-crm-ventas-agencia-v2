@@ -155,6 +155,37 @@ Rollback boundary: only the new `20261105140000_visit_states.sql` functions,
 their test and this state-management contract. Existing storage, data, RLS and
 creation functions are unchanged; never remove historical visit data to roll back.
 
+## Pending visit rescheduling
+
+`reschedule_visit(p_visit_id uuid, p_scheduled_at timestamptz, p_agreed boolean)`
+returns `{ "visit_id": "..." }` for the same visit. Current responsible active
+sellers and active Owner/Admin may reschedule Requested or Confirmed visits.
+`true` records an agreed Confirmed appointment; `false` records a Requested
+proposal, including a downgrade from Confirmed. There is no rescheduling limit.
+
+The new time must be finite, future and inside current local opening intervals
+(opening inclusive, closing exclusive). Managed row locks precede the existing
+opening-time helper, so validation uses the clock and schedule after waits.
+Exact valid retries add no history; they still require authorization and a valid
+future appointment. Other changes append old/new appointment and status, actor
+and timestamp atomically. Identity, purpose, creation intent, request attribution
+and any first-outcome attribution survive. No inquiry, reservation or routing
+operation is performed. Final visits must first use authorized state correction;
+rescheduling never reactivates them.
+
+Errors: `42501 visit access denied`; `22023 only pending visits can be rescheduled`,
+`visit agreement is required`, or `visit time must be future and within opening hours`.
+Use READ COMMITTED. Anonymous and service-role execution are not granted.
+Rollback boundary: only the new rescheduling function, regression suite and
+contract; do not remove historical visit data or existing helpers.
+
+Observed RED: missing RPC. Focused suite `0032_visit_rescheduling_test.sql` passed
+35/35; full database suite passed 1548/1548 across 32 files. Independent proof
+passed 58 assertions and seven observed lock-wait races, repeated by the parent
+with `python scripts/test-visit-rescheduling-concurrency.py`. Native review pending. Local `migration up` encountered an already-existing
+T3a function absent from its migration ledger; only the new T3b migration was
+applied directly with `psql`, without reset or ledger changes.
+
 ## Verification
 
 State transitions: `pnpm exec supabase test db supabase/tests/0031_visit_state_test.sql`

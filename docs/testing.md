@@ -187,3 +187,7 @@ For deterministic behavior with a runnable harness: observe a meaningful failing
 Each functional delivery must pass applicable formatting, lint, strict types, focused tests, relevant suites and build. Document exact commands and outcomes when tooling exists. Review mobile/desktop, keyboard access, empty/loading/error states and actual optimized image quality. No global coverage percentage is required.
 
 For the current local shell, typecheck and build both workspaces and verify each loopback-only placeholder responds with HTTP 200. No deterministic business behavior or runnable business tests exist yet; RED/GREEN and backend permission proof remain pending. Never infer infrastructure readiness from shell builds.
+
+## Visit rescheduling T3b
+
+Missing-function RED observed; 0032 focused suite 35/35 and full suite 1548/1548 across 32 SQL files passed. Independent verifier and parent each passed 58 assertions including seven real lock waits, rollback hashes and immutable creation retries. Retained command: python scripts/test-visit-rescheduling-concurrency.py (use an installed Python executable if the Windows alias is unavailable). The runner creates an owned disposable database and external scratch, leaving both for caller cleanup. SQL-role proof only; HTTP JWT, UI and TypeScript build are not exercised. Local migration ledger discrepancy predates T3b; only the new migration was applied directly, without reset or ledger repair.
