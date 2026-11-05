@@ -1,15 +1,21 @@
 # Vehicle-view database ingestion
 
-Status: T6a database slice only. Successful public detail-page capture and the
-known-bot User-Agent filter are not integrated. This is not complete S21 proof.
+Status: T6a database plus T8 public integration. The vehicle-detail page in
+`apps/public` now records a view only after a successful public load, behind a
+server-side known-bot User-Agent filter, with the opaque browser token minted at
+the server boundary. This is capture proof, not complete S21: visits, contact
+clicks, retention and UI-panel claims remain out of scope.
 
 ## Trusted-server contract
 
 `public.record_vehicle_view(p_vehicle_id uuid, p_browser_token uuid) -> boolean`
 is executable only by `service_role`. Neither anonymous callers nor authenticated
-staff can invoke it. The future public server must call it only after a successful
-public detail-page load and known-bot filtering. Never expose privileged keys in
-the browser. No public endpoint or private-panel emitter is added by this slice.
+staff can invoke it. The public vehicle-detail page
+(`apps/public/app/vehiculo/[id]/page.tsx`) calls it through `lib/capture.ts`
+only after a successful public detail-page load and behind the server-side
+known-bot filter (`lib/bots.ts`); the call runs in `after()` once the response
+has been sent. Never expose privileged keys in the
+browser. No private-panel emitter is added by this slice.
 
 - The browser token is a random opaque UUID, not a phone, identity or fingerprint.
 - `true` means one counted event was stored; `false` means the pair was already
@@ -50,6 +56,11 @@ wall time catches up; no speculative recovery or identity verification is added.
 - `python scripts/test-auth-http.py` — real PostgREST calls: `service_role` records
   and deduplicates a view over HTTP, while `anon` and `authenticated` receive
   permission denial; see [auth-http](auth-http.md).
+- `pnpm --filter @dealership/public test` — unit tests for the known-bot filter.
+- `python scripts/test-public-capture.py` — end-to-end HTTP proof: successful
+  load records one view with an httpOnly opaque cookie, 24h dedup, known bot
+  receives the ficha but records nothing, draft/blocked/unknown return `404`
+  with no capture, and the service-role key never appears in a response body.
 
 The focused test rolls back synthetic fixtures. The retained independent runner
 creates two new explicitly named disposable databases, applies caller-provided
@@ -59,5 +70,6 @@ existing database. Parent cleanup owns the reported databases and scratch files.
 It proves 87 real permission denials with unchanged state, commercial-state
 preservation, baseline output/error/exit equivalence, overlapping commit/rollback
 deduplication and independent-key progress, and expiry across an actual lock wait.
-The runner does not prove Auth HTTP behavior. UI, bot filtering and successful-load
-HTTP proof remain pending separately.
+The runner does not prove Auth HTTP behavior. Bot filtering and successful-load
+HTTP proof are covered by T8 above (`scripts/test-public-capture.py`). UI and
+reporting readers remain pending separately.

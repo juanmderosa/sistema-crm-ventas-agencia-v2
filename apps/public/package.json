@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev --hostname 127.0.0.1 --port 3000",
     "build": "next build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --test lib/*.test.ts"
   },
   "dependencies": {
     "next": "16.2.9",
