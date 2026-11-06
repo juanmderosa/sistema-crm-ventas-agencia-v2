@@ -227,3 +227,27 @@ preexisting migration ledger. T4 commit `19dd7ee` passed all four native review
 lenses without findings; exact acknowledgement completed. Closure focused rerun:
 47/47, with no source correction. Full suite and concurrency counts above are
 the previously observed results, not fresh closure reruns.
+
+## Visit reporting T5
+
+Missing-reader RED observed before the additive migration. Final focused
+`pnpm exec supabase test db supabase/tests/0034_visit_reporting_test.sql`:
+**48/48**. Full `pnpm db:test`: **1645/1645**, 34 files. An initial test harness
+used unreturned TAP assertions inside a DO block; explicit SELECTs fixed TAP
+numbering without changing production code.
+
+Independent S13–S16 verification: **114 assertions**, including 27 rejected
+read calls with unchanged all-public-table hashes and eight exact legacy-reader
+stdout/stderr/exit differentials. Baseline migration contents (newline normalized)
+and existing reader, period and role-guard definitions are unchanged. Checks cover
+historical own attribution without restored detail access, private response
+shapes, Buenos Aires boundaries/session timezone, current outcomes, corrections,
+reactivation, unassigned responsibility and rescheduling without duplicate requests.
+Candidate focused suite also passed 48/48 in a clean disposable database; parent
+recreated that owned database and repeated the verifier command successfully.
+Five owned verification databases and the external scratch directory were removed
+and confirmed. Shared database was never reset; only the new migration was applied.
+
+SQL-role proof only: no real HTTP JWT, UI/build or concurrency claim. This is an
+additive read-only reporting unit; existing RPCs and shared helpers are unchanged.
+Native candidate review and local commit remain pending.

@@ -2,7 +2,50 @@
 
 Status: T1–T3b are complete, including rescheduling and its native review.
 T4 automatic cancellation is complete at commit `19dd7ee`, independently verified
-and approved/acknowledged by native review. Reporting integration and UI remain pending.
+and approved/acknowledged by native review. T5 reporting is implemented with
+functional and independent verification complete; commit and native review are pending.
+Public form and internal agenda UI remain deferred.
+
+## Visit reporting (T5)
+
+Two additive, read-only RPCs accept `(p_kind text, p_start date, p_end date default null)`:
+
+| RPC | Access | Output |
+|---|---|---|
+| `get_visit_reporting_summary` | Active Owner/Admin | `period`, `totals`, `by_vehicle`, `by_staff` |
+| `get_my_visit_reporting_summary` | Active staff, own attribution only | `period`, `figures`, `scope: {subject: "self"}` |
+
+Counts are `requests`, `attended`, `cancelled`, `no_show`. One visit contributes
+one request by creation date and at most one current final result by scheduled
+date. Requested/Confirmed visits contribute no final result. Corrections replace
+the previous category, restoration removes the final result, and rescheduling
+does not create a request. History rows never multiply counts. These are absolute
+figures, not inquiry counts, conversion rates or evidence of who physically attended.
+
+Periods reuse `reporting_period`: `month`, `quarter`, `semester`, `year` contain
+the anchor date; `custom` includes both supplied local days. Fixed business zone:
+`America/Argentina/Buenos_Aires`, regardless of session timezone. For example:
+
+```sql
+select public.get_my_visit_reporting_summary('month', date '2026-11-01');
+select public.get_visit_reporting_summary('custom', date '2026-11-01', date '2026-11-30');
+```
+
+Request responsibility comes from creation; outcome responsibility comes from
+the first recorded outcome, even after correction, reactivation or reassignment.
+The administrative reader groups by the visit's concrete vehicle and historical
+staff ID, retaining deactivated staff. Null staff is `attribution: "unassigned"`
+(UI label: «Sin responsable»), never the recording administrator. Empty counts
+are zero and empty breakdowns are `[]`. Comparing periods uses separate calls.
+
+The own reader scopes each source to `auth.uid()`, including former assignments
+without restoring visit/inquiry detail access. It returns no vehicle IDs, staff
+IDs/comparisons, global totals, views, ratios, customer data or raw history.
+There is no caller-provided staff selector. Existing reporting RPCs are unchanged.
+Anonymous and service roles have no execution grant. Unauthorized authenticated
+calls fail before date validation with `42501 visit reporting access denied` or
+`42501 own visit reporting access denied`. Invalid/nonfinite dates, kinds and
+custom ranges reuse the existing `22023` reporting-period errors.
 
 ## Automatic cancellation (T4)
 

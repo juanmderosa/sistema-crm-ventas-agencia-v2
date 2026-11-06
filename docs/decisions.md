@@ -249,3 +249,16 @@ and makes parent mutations fail atomically if cancellation history cannot be sto
 No historical backfill is performed. Future reassignment work must verify current
 responsibility attribution under concurrent cancellation; no reassignment API is
 added here. Combined vehicle changes use deletion, Sold, then blocking reason order.
+
+## T5 additive visit reporting (2026-11-06)
+
+Keep visit metrics in separate global and own-only readers rather than changing
+existing reporting JSON contracts. Both reuse the existing period normalizer;
+the own reader filters each source by immutable responsibility before aggregation,
+never by filtering an administrative response or current inquiry visibility.
+This preserves historical counts after reassignment without restoring detail access.
+Count the current visit row, not history events: requests use creation time and
+creation responsibility; final results use scheduled time and first-outcome
+responsibility. Separate period calls support comparisons. This adds one reporting
+call for visits but avoids breaking existing consumers or exposing global figures
+to sellers. No new UI, conversion metric or who-attended attribution is introduced.
