@@ -2,8 +2,8 @@
 
 Status: T1–T3b are complete, including rescheduling and its native review.
 T4 automatic cancellation is complete at commit `19dd7ee`, independently verified
-and approved/acknowledged by native review. T5 reporting is implemented with
-functional and independent verification complete; commit and native review are pending.
+and approved/acknowledged by native review. T5 reporting is complete at commit
+`97efab6`, with functional/independent verification and native review approved/acknowledged.
 Public form and internal agenda UI remain deferred.
 
 ## Visit reporting (T5)

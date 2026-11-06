@@ -250,4 +250,5 @@ and confirmed. Shared database was never reset; only the new migration was appli
 
 SQL-role proof only: no real HTTP JWT, UI/build or concurrency claim. This is an
 additive read-only reporting unit; existing RPCs and shared helpers are unchanged.
-Native candidate review and local commit remain pending.
+T5 commit `97efab6` passed risk/readability/reliability native review without findings;
+exact acknowledgement completed. No source correction or new functional rerun was needed.
