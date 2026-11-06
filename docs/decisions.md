@@ -262,3 +262,17 @@ creation responsibility; final results use scheduled time and first-outcome
 responsibility. Separate period calls support comparisons. This adds one reporting
 call for visits but avoids breaking existing consumers or exposing global figures
 to sellers. No new UI, conversion metric or who-attended attribution is introduced.
+
+## Bound profile-role management (2026-11-06)
+
+Replace the broad Owner/Admin profile-update policy with asymmetric existing-row
+and resulting-row checks using the existing active-role helper. A resulting-row
+check alone would not prevent an Admin from modifying an existing privileged
+account; an existing-row check alone would allow Seller promotion. Preserve
+Admin self-renaming without granting self role or activation management. Narrow
+application UPDATE grants to role, name and activation so profile identity and
+system timestamps cannot be rebound or rewritten. Keep direct permitted profile
+updates rather than introducing a new RPC, lock order or account lifecycle.
+The existing last-active-Owner trigger and statement-snapshot semantics remain
+unchanged. Historical migrations are not edited; rollback is this policy/grant
+change and its focused tests/docs, not unrelated commercial logic.

@@ -30,6 +30,24 @@ Status: baseline derived from approved roles, not implemented policies. Owner an
 | View statistics | Global and seller breakdown | Global and seller breakdown | Authorized own activity |
 | Hard-delete vehicle | Not in MVP | Not in MVP | Not in MVP |
 
+## Profile-management enforcement
+
+The profile update boundary is enforced by database RLS on both the existing and
+resulting row. An active Owner may manage staff roles and activation, subject to
+the unchanged last-active-Owner safeguard. An active Admin may rename, deactivate
+or reactivate Seller targets, but cannot promote them or modify another
+Owner/Admin account, including inactive accounts. An Admin may still rename self
+while remaining an active Admin; self role changes and self-deactivation are denied.
+Sellers and inactive/missing staff have no profile-management permission.
+
+Authenticated updates accept only `role`, `display_name` and `is_active`.
+Auth identity links (`id`) and system timestamps are not caller-writable;
+`updated_at` remains trigger-managed. A disallowed existing target is invisible
+to UPDATE (zero changed rows); a disallowed resulting row or column fails with
+`42501`. Applications must not interpret a zero-row update as successful mutation.
+The existing read policies, statement-snapshot authorization and account-creation
+boundary are unchanged. This does not implement invitations or Owner bootstrap.
+
 ## Public access
 
 - No panel registration and no anonymous access to private records.
