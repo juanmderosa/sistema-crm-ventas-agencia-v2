@@ -223,4 +223,7 @@ databases and both external scratch directories were removed and confirmed.
 
 SQL-role proof only; real HTTP JWT, UI and TypeScript build are not exercised.
 Apply only the additive migration; do not reset the shared database or repair its
-preexisting migration ledger. Commit and native candidate review remain pending.
+preexisting migration ledger. T4 commit `19dd7ee` passed all four native review
+lenses without findings; exact acknowledgement completed. Closure focused rerun:
+47/47, with no source correction. Full suite and concurrency counts above are
+the previously observed results, not fresh closure reruns.

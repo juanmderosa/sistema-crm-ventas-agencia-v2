@@ -1,8 +1,8 @@
 # Visit backend foundation
 
 Status: T1–T3b are complete, including rescheduling and its native review.
-T4 automatic cancellation is implemented and independently verified; commit and
-native review remain pending. Reporting integration and UI remain pending.
+T4 automatic cancellation is complete at commit `19dd7ee`, independently verified
+and approved/acknowledged by native review. Reporting integration and UI remain pending.
 
 ## Automatic cancellation (T4)
 
