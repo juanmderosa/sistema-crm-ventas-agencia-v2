@@ -4,6 +4,32 @@ Status: strategy for business flows. The local stack now applies twenty versione
 
 ## Verified public-capture checks
 
+S21a T3a closure: commit `e957e9e` adds state-only visit transitions and historical
+corrections. Missing-function RED, focused `0031_visit_state_test.sql` **45/45**,
+full database suite **1513/1513 across 31 files**. Independent S8/S9 proof passed:
+31 assertions, rejected-command full-public-data hashes, five observed lock/release
+races and original public/private retry preservation. Parent repeated retained
+`python scripts/test-visit-state-concurrency.py` successfully. Four owned test
+databases and two external scratch directories were removed. User-granted native
+four-lens review approved without findings; exact acknowledgement for
+`review-26b7bf31a3d343e8` returned `authority: burned`, consumed revision
+`sha256:34fabb5eb6c41615f7e4d6de0678f363b9587a08a3866220857e1b0cfac1cdba`.
+No shared reset, rescheduling, cross-flow cancellation, reporting or UI change.
+SQL-role proof only; real JWT HTTP was not exercised; build/typecheck are not
+applicable to this SQL/Python/documentation slice.
+
+S21a T2b closure: behavior commit `eb78f5a` (389 authored lines), functional and scoped independent proof complete; user granted native four-lens review, approved without blockers. Exact acknowledgement for `review-1c6bb01a7c591419` returned `authority: burned` at consumed revision `sha256:51819f7fef48580a064a8476eb3296599a4df06de7ff9af8c07f00869674fa19`. This supersedes pending-native wording below. One non-blocking later test improvement: require two non-null equal assignees in the retained same-phone concurrency assertion, since COUNT DISTINCT ignores NULL. It does not reopen the approved candidate. T2 creation is complete; lifecycle, cross-flow automatic cancellation, reporting integration, browser submission and UI remain pending. No push, PR or merge.
+
+S21a T2b functional/independent proof complete; native review pending. Missing-public-RPC RED observed, then 29/29 focused and 1465/1465 across 30 files after only `20261105130000_public_visit_requests.sql`, without shared reset. Initial independent partial proof was completed through the user-authorized bounded continuation: ordinary baseline/candidate normalized persisted effects match (canonical contacts, snapshots, origins, interests, rotation/continuity/unassigned and attribution ledgers); expiry after a real schedule-lock wait rejects with unchanged all-public-table hash; independent time/null/timezone/changed-timestamp and exact terminal ledger assertions pass. Earlier literal role denials, three injected insertion-failure rollbacks and real races stand. Parent retained `scripts/test-public-visit-concurrency.py` and observed all six waits/releases and exact accepted-only responses/terminal state; final focused **32/32**, full **1468/1468 across 30 files**. Historical foundation replay failures were baseline-identical Auth scaffold issues, not candidate regressions. Internal PostgreSQL CONTEXT line numbers changed; external ordinary messages, stdout and exits matched. No real JWT HTTP/build/typecheck claim.
+
+S21a T2a closure: behavior commit `6ddbaa0` (393 authored lines) approved by user-granted native four-lens review. Exact acknowledgement for `review-c3737216de3181c6` returned `authority: burned`, consumed revision `sha256:1915c182b75f83c3fc38648877e8ad039ec6a8636fde9f7bb199c452d665e790`. Two non-blocking later test improvements: freeze the SQL retry slot across midnight and assert concurrent retry response IDs. Neither opened a correction or requires repeating review of the unchanged T2a candidate. This supersedes pending-native wording below for T2a only.
+
+S21a T2a private creation: observed missing-function RED, then applied only `20261105120000_private_visit_creation.sql` without reset. Focused `0029_visit_creation_test.sql` **36/36**, full suite **1436/1436 across 29 files**. Independent isolated verification found no blocker: current-access authorization, original-intent retry under changed timezone/state, rejection hashes for all public tables, unchanged existing function definitions and normalized legacy suite parity. Parent retained `python scripts/test-private-visit-concurrency.py verify_visits_<owned_empty_migrated_db>` and observed five real waits with explicit release: competing vehicles for one inquiry, identical retry, expired time while waiting for schedule, deactivation and reassignment; exact final two visits/history/intents and unchanged reservation/routing state passed. Minimal Auth scaffolds do not prove JWT HTTP. Verifier scratch typecheck failed due to incomplete copied dependencies; no TypeScript changed and build/typecheck are not applicable required checks for this SQL/Python unit. Native review pending. Public submission is deferred T2b. Risk: items 2 and 4.
+
+S21a T1 closure: local definition/plan commit `a7424d9` assessed passive; behavior commit `12d9fdc` contains 386 authored lines with its tests and contract. User granted native four-lens review; no blocking findings. Exact acknowledgement for lineage `review-0be16a1d9926cc49` returned `authority: burned` at consumed revision `sha256:9450cfbd903a80599aba601510b7b45af911e632f689c3a23220ab3ef9a64267`. This supersedes the pending-review wording below. Two non-blocking test follow-ups remain separate later work: assert seller schedule reads while intervals are populated, and replace the concurrency runner's fixed five-second overlap with an explicit release handshake. No correction or new review is required for the unchanged approved candidate. T1 alone is complete; visit creation, lifecycle, cross-flow cancellation, metrics integration and UI remain pending. No push, PR or merge performed.
+
+S21a T1 foundation (2026-11-05): migration `20261105110000_visit_foundation.sql` adds weekly opening intervals, an Owner/Admin replacement RPC, private visits/history and one pending visit per inquiry. Observed RED: missing tables (3 failing assertions, missing `public.visits`, exit 1). Applied only the new migration with `pnpm exec supabase migration up`, without reset. Focused `0028_visit_foundation_test.sql` passes **52/52**; full `pnpm db:test` passes **1400/1400 across 28 files**, superseding the older aggregate above (21 migrations). Independent isolated database probes found no reproduced blocker: role/RLS boundaries, exact rejected-input and denied-operation public-data hashes, storage constraints, retained unassigned first-result marker, one existing RPC differential and unchanged existing public function definitions. Independent real concurrent replacements observed an advisory lock wait and exact last-writer complete schedule. Parent retained the regression runner `python scripts/test-visit-hours-concurrency.py verify_visits_<owned_disposable_database>` and observed both waits and exact final schedule on the owned candidate DB. No shared reset, Auth JWT HTTP, build, typecheck, visit-creation/lifecycle/reporting integration or UI proof claimed. Independent inactive Owner/Admin and concurrent actor-deactivation waits were not separately exercised. Functional and scoped independent proof complete; commit/delivery strategy and native candidate review pending. Risk: items 2 (RLS/configuration authorization) and 4 (serialized schedule replacement). See [visit foundation](visits.md).
+
 T8: public vehicle-detail capture boundary with server-side known-bot User-Agent filter (2026-11-05). Test-first: `apps/public/lib/bots.test.ts` observed RED (`ERR_MODULE_NOT_FOUND` for the missing `lib/bots.ts`), then GREEN 6/6 via `pnpm --filter @dealership/public test` (known search/social/AI crawlers and non-browser agents filtered; Chrome/Firefox/Safari and missing or empty User-Agent counted; case-insensitive partial matching). HTTP probe `python scripts/test-public-capture.py` (standard library; spawns `next dev` on a free loopback port with the service-role key injected only into that server process, seeds published/draft/sale-blocked fixtures via psql) observed RED at 14 checks / 9 failures while the route was missing, then **14 checks, 0 failures**, repeated after `pnpm db:reset`. Probes: a successful published ficha load returns `200`, renders the vehicle and mints an httpOnly `bv_token` UUID cookie, then records exactly one view; a repeat load inside the rolling 24-hour window stays deduplicated; a Googlebot User-Agent still receives the ficha but records no view; draft, sale-blocked and unknown ids return `404` with zero views; the service-role key never appears in a response body. Implementation: `apps/public/app/vehiculo/[id]/page.tsx` captures via `after()` only after a successful load, `proxy.ts` mints the opaque cookie and overwrites `x-bv-token` so clients cannot supply their own, `lib/vehicles.ts` loads through the anon role (RLS decides visibility), `lib/capture.ts` holds the service-role RPC call. `pnpm typecheck` and `pnpm build` pass for both apps (`/vehiculo/[id]` route and Proxy emitted); pgTAP 1348/1348 across 27 files after `pnpm db:reset` with comment-only migration `20261105100000_vehicle_view_capture_integration.sql`. Local manual runs require `apps/public/.env.local` with `SUPABASE_URL`, `SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` (gitignored; Next reads env files from the app directory, not the monorepo root); the probe injects the same three variables into the server process itself. Scope: capture and bot filtering only — visits (S21a), contact clicks, retention and UI-panel claims remain pending. Risk: item 2 (service-role credential must stay server-side). Native assessment high (`process_boundary` on the probe); user selected "Omitir esta vez" and the exact decline returned `action: declined` / `consent: declined_this_candidate` with no review authority created.
 
 ## Verified Auth/PostgREST HTTP checks
@@ -161,3 +187,68 @@ For deterministic behavior with a runnable harness: observe a meaningful failing
 Each functional delivery must pass applicable formatting, lint, strict types, focused tests, relevant suites and build. Document exact commands and outcomes when tooling exists. Review mobile/desktop, keyboard access, empty/loading/error states and actual optimized image quality. No global coverage percentage is required.
 
 For the current local shell, typecheck and build both workspaces and verify each loopback-only placeholder responds with HTTP 200. No deterministic business behavior or runnable business tests exist yet; RED/GREEN and backend permission proof remain pending. Never infer infrastructure readiness from shell builds.
+
+## Visit rescheduling T3b
+
+Missing-function RED observed; 0032 focused suite 35/35 and full suite 1548/1548 across 32 SQL files passed. Independent verifier and parent each passed 58 assertions including seven real lock waits, rollback hashes and immutable creation retries. Retained command: python scripts/test-visit-rescheduling-concurrency.py (use an installed Python executable if the Windows alias is unavailable). The runner creates an owned disposable database and external scratch, leaving both for caller cleanup. SQL-role proof only; HTTP JWT, UI and TypeScript build are not exercised. Local migration ledger discrepancy predates T3b; only the new migration was applied directly, without reset or ledger repair.
+
+## Visit cross-flow cancellation T4
+
+Observed RED: 20 of 44 assertions failed before the new triggers. Initial GREEN:
+44/44. Two existing creation-test aggregate history expectations were updated to
+distinguish unchanged creation history from the approved cancellation event.
+Final focused suite: **47/47**. Final `pnpm db:test`: **1597/1597**, 33 SQL files.
+
+Independent S11/S12 verification passed with no reproduced blocker:
+- Twelve actual PostgreSQL lock waits, observed through blocking PIDs,
+  `pg_stat_activity` and `pg_locks`, followed by explicit release: both orders of
+  sale report/closure versus rescheduling, blocking versus creation/restoration/
+  result, and overlapping report/block cancellations. Exact terminal history,
+  attribution and appointment effects passed without deadlocks or duplicates.
+- Actual direct calls to all three private hooks denied for anon, authenticated
+  and service roles; rejected-command hashes of every public table unchanged.
+- Injected history failure rolled back sale reporting and blocking completely.
+- Six baseline differentials (report, resolve, block, reopen, reserve and generic
+  vehicle update) preserved normalized stdout, stderr, exit code and all public
+  table state. Pending visits were absent specifically to exclude the approved
+  new cancellation effects; existing RPC definitions and RLS are unchanged.
+
+Parent repeated the independent read-only evidence check successfully. Retained
+regressions: `python scripts/test-visit-cross-flow-concurrency.py`, observed
+**85/85** checks and twelve real waits on a fresh disposable database. The runner
+uses the local migrated Supabase schema, creates its own database and external
+scratch, prints their identities, and leaves both for caller cleanup. It does not
+read git history or reset the shared database. All five owned verification
+databases and both external scratch directories were removed and confirmed.
+
+SQL-role proof only; real HTTP JWT, UI and TypeScript build are not exercised.
+Apply only the additive migration; do not reset the shared database or repair its
+preexisting migration ledger. T4 commit `19dd7ee` passed all four native review
+lenses without findings; exact acknowledgement completed. Closure focused rerun:
+47/47, with no source correction. Full suite and concurrency counts above are
+the previously observed results, not fresh closure reruns.
+
+## Visit reporting T5
+
+Missing-reader RED observed before the additive migration. Final focused
+`pnpm exec supabase test db supabase/tests/0034_visit_reporting_test.sql`:
+**48/48**. Full `pnpm db:test`: **1645/1645**, 34 files. An initial test harness
+used unreturned TAP assertions inside a DO block; explicit SELECTs fixed TAP
+numbering without changing production code.
+
+Independent S13–S16 verification: **114 assertions**, including 27 rejected
+read calls with unchanged all-public-table hashes and eight exact legacy-reader
+stdout/stderr/exit differentials. Baseline migration contents (newline normalized)
+and existing reader, period and role-guard definitions are unchanged. Checks cover
+historical own attribution without restored detail access, private response
+shapes, Buenos Aires boundaries/session timezone, current outcomes, corrections,
+reactivation, unassigned responsibility and rescheduling without duplicate requests.
+Candidate focused suite also passed 48/48 in a clean disposable database; parent
+recreated that owned database and repeated the verifier command successfully.
+Five owned verification databases and the external scratch directory were removed
+and confirmed. Shared database was never reset; only the new migration was applied.
+
+SQL-role proof only: no real HTTP JWT, UI/build or concurrency claim. This is an
+additive read-only reporting unit; existing RPCs and shared helpers are unchanged.
+T5 commit `97efab6` passed risk/readability/reliability native review without findings;
+exact acknowledgement completed. No source correction or new functional rerun was needed.
