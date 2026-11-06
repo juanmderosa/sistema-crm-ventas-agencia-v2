@@ -232,3 +232,20 @@ Reviewed tradeoff: with a single developer, `develop` adds one integration hop t
 ## T3b rescheduling implementation (2026-11-05)
 
 Rescheduling reuses managed-visit locks followed by the existing opening-time helper, rather than duplicating authorization or scheduling rules. The explicit agreement boolean chooses Confirmed versus Requested. Exact valid retries are no-ops after current authorization and time validation; this is not immutable creation-request idempotency. Only appointment and status change; history records both old and new values, and creation/first-outcome attribution remains untouched. Existing functions and RLS are unchanged.
+
+## T4 cross-flow visit cancellation (2026-11-06)
+
+User approved immediate pending-visit cancellation when an inquiry reports Venta
+concretada, without waiting for administrative confirmation. Vehicle confirmation
+separately cancels pending visits for that vehicle, without closing other inquiries.
+Closing without sale, first soft deletion and internal blocking also cancel pending
+visits; reservation, reopening and unblocking do not restore or cancel them.
+
+Use private parent-table AFTER UPDATE triggers and one visit-only helper, rather
+than rewriting commercial RPCs or reusing the managed-visit helper (which would
+take upward locks). This covers authorized generic inventory soft deletion and
+future controlled inquiry closure consistently, preserves first-outcome attribution,
+and makes parent mutations fail atomically if cancellation history cannot be stored.
+No historical backfill is performed. Future reassignment work must verify current
+responsibility attribution under concurrent cancellation; no reassignment API is
+added here. Combined vehicle changes use deletion, Sold, then blocking reason order.

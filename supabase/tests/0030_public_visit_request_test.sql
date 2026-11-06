@@ -84,6 +84,7 @@ select throws_ok($$select public.submit_visit_request(pg_temp.pu(108),pg_temp.pu
  '42501','permission denied for function submit_visit_request','anonymous direct execution denied');
 reset role;
 select is((select count(*)::int from public.visits),2,'only two successful distinct visit requests stored');
-select is((select count(*)::int from public.visit_history),2,'technical retries add no history');
+select is((select count(*)::int from public.visit_history where from_status is null),2,'technical retries add no creation history');
+select is((select count(*)::int from public.visit_history where to_status='cancelled'),1,'blocking adds one cancellation; technical retries and closure add none');
 select * from finish();
 rollback;

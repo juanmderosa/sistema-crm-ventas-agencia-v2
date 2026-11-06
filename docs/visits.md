@@ -1,8 +1,38 @@
 # Visit backend foundation
 
-Status: T1 foundation, T2a private creation, T2b service-only public creation and
-T3a state/correction operations. Rescheduling, automatic cancellation, reporting
-integration and UI remain pending. T3a verification and native review are complete.
+Status: T1–T3b are complete, including rescheduling and its native review.
+T4 automatic cancellation is implemented and independently verified; commit and
+native review remain pending. Reporting integration and UI remain pending.
+
+## Automatic cancellation (T4)
+
+| Event | Pending visits cancelled | History reason |
+|---|---|---|
+| Inquiry becomes Sale reported or Closed without sale | That inquiry, regardless of interest vehicle | `Consulta cerrada` |
+| Vehicle becomes Sold | That vehicle across inquiries | `Vehículo vendido` |
+| Vehicle first soft-deleted | That vehicle across inquiries | `Vehículo dado de baja` |
+| Vehicle becomes internally blocked | That vehicle across inquiries | `Vehículo bloqueado` |
+
+Sale reporting cancels immediately, before administrative confirmation. Other
+inquiries remain open. Reservation, unrelated edits, reopening and unblocking do
+not cancel or restore visits. Final visits are untouched. A combined vehicle edit
+uses deletion, then Sold, then blocking reason precedence, with one history event.
+
+Private AFTER UPDATE triggers reuse one private cancellation helper; application
+roles cannot execute it or either trigger function directly. Existing operations
+retain their grants, validation, return values and commercial effects. Cancellation
+and history commit or roll back with the parent operation, including sale review.
+No new general inquiry-close API is introduced.
+
+The helper takes only visit-row locks in ID order, never upward vehicle, actor or
+inquiry locks. Existing visit operations obtain parent locks before visit locks.
+Read current inquiry responsibility after acquiring the visit lock; preserve the
+first recorded outcome, including explicitly unassigned attribution. Appointment,
+purpose, request attribution and immutable creation intent remain unchanged.
+History records the parent's authenticated actor (or NULL for privileged system
+maintenance), both states, unchanged appointment, reason and cancellation time.
+READ COMMITTED is required. A future reassignment API must verify attribution
+serialization with these automatic outcomes rather than assuming its lock order.
 
 ## Opening-hours configuration
 

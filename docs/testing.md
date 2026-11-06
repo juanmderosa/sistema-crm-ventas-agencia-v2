@@ -191,3 +191,36 @@ For the current local shell, typecheck and build both workspaces and verify each
 ## Visit rescheduling T3b
 
 Missing-function RED observed; 0032 focused suite 35/35 and full suite 1548/1548 across 32 SQL files passed. Independent verifier and parent each passed 58 assertions including seven real lock waits, rollback hashes and immutable creation retries. Retained command: python scripts/test-visit-rescheduling-concurrency.py (use an installed Python executable if the Windows alias is unavailable). The runner creates an owned disposable database and external scratch, leaving both for caller cleanup. SQL-role proof only; HTTP JWT, UI and TypeScript build are not exercised. Local migration ledger discrepancy predates T3b; only the new migration was applied directly, without reset or ledger repair.
+
+## Visit cross-flow cancellation T4
+
+Observed RED: 20 of 44 assertions failed before the new triggers. Initial GREEN:
+44/44. Two existing creation-test aggregate history expectations were updated to
+distinguish unchanged creation history from the approved cancellation event.
+Final focused suite: **47/47**. Final `pnpm db:test`: **1597/1597**, 33 SQL files.
+
+Independent S11/S12 verification passed with no reproduced blocker:
+- Twelve actual PostgreSQL lock waits, observed through blocking PIDs,
+  `pg_stat_activity` and `pg_locks`, followed by explicit release: both orders of
+  sale report/closure versus rescheduling, blocking versus creation/restoration/
+  result, and overlapping report/block cancellations. Exact terminal history,
+  attribution and appointment effects passed without deadlocks or duplicates.
+- Actual direct calls to all three private hooks denied for anon, authenticated
+  and service roles; rejected-command hashes of every public table unchanged.
+- Injected history failure rolled back sale reporting and blocking completely.
+- Six baseline differentials (report, resolve, block, reopen, reserve and generic
+  vehicle update) preserved normalized stdout, stderr, exit code and all public
+  table state. Pending visits were absent specifically to exclude the approved
+  new cancellation effects; existing RPC definitions and RLS are unchanged.
+
+Parent repeated the independent read-only evidence check successfully. Retained
+regressions: `python scripts/test-visit-cross-flow-concurrency.py`, observed
+**85/85** checks and twelve real waits on a fresh disposable database. The runner
+uses the local migrated Supabase schema, creates its own database and external
+scratch, prints their identities, and leaves both for caller cleanup. It does not
+read git history or reset the shared database. All five owned verification
+databases and both external scratch directories were removed and confirmed.
+
+SQL-role proof only; real HTTP JWT, UI and TypeScript build are not exercised.
+Apply only the additive migration; do not reset the shared database or repair its
+preexisting migration ledger. Commit and native candidate review remain pending.
