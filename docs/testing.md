@@ -252,3 +252,31 @@ SQL-role proof only: no real HTTP JWT, UI/build or concurrency claim. This is an
 additive read-only reporting unit; existing RPCs and shared helpers are unchanged.
 T5 commit `97efab6` passed risk/readability/reliability native review without findings;
 exact acknowledgement completed. No source correction or new functional rerun was needed.
+
+## Profile-management authorization fix
+
+New `0035_profile_management_test.sql` observed RED with 12 failures out of 34
+before the additive policy/grant migration. GREEN: **34/34**; full `pnpm db:test`:
+**1679/1679**, 35 files. Existing identity tests remain unchanged, including Admin
+self-renaming and last-active-Owner checks. New cases cover both promotion targets,
+existing/inactive privileged accounts, role/activation self-management, immutable
+identity/system columns, Owner management and authorization loss after demotion.
+Only the additive migration was applied directly, without reset or ledger repair.
+Independent verification passed 128 assertions, including 40 rejected/filtered
+updates with unchanged all-public-table hashes, bulk filtering/atomicity, 11 exact
+valid-operation baseline differentials (excluding trigger-managed `updated_at`),
+nine profile-read cases and four unchanged own-reporting cases. Parent repeated
+the independent runtime command: 128 assertions and isolated 34/34 pgTAP passed.
+Existing migrations, role helpers and last-Owner trigger are unchanged. Two owned
+verification databases and their external scratch were removed and confirmed.
+An initial verifier harness rejected a server-log setting before the intended
+UPDATE; those negative results were discarded and rerun with client-side SQLSTATE
+verbosity. No production correction was required after independent verification.
+User-granted native risk/readability/reliability review returned no findings;
+exact acknowledgement completed for `review-40e0943cfcf3eaaa`, target
+`sha256:690da77eab8d71f30c6f1b32a04214c863f84e0b120ceb4a121453ef022dc818`,
+at consumed revision `sha256:93c7816710162162513ea77a855df736d367445b90ee902b1fe49c76a5a49082`.
+No source correction or new functional rerun was needed during native review.
+User authorized a local commit only; no push, merge or deployment. SQL-role
+proof only; real JWT HTTP verification is a separate follow-up audit task.
+No account lifecycle or concurrency redesign.
