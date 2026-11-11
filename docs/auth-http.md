@@ -1,10 +1,10 @@
 # Auth / PostgREST / JWT HTTP verification
 
-Status: verified against the running local stack (Kong on `127.0.0.1:55321`,
-GoTrue and PostgREST), using genuine GoTrue users and JWTs issued by password
-grant, not simulated `set role` or forged `request.jwt.claim.sub` claims.
-This documents observed HTTP behavior only; it claims no UI, no remote
-deployment and no foundation completion.
+Status: verified against a disposable local Supabase stack with genuine GoTrue
+users and password-grant JWTs, not simulated `set role` or forged claims. The
+latest run passed 203 HTTP/JWT checks, including visit permissions, lifecycle,
+reporting, and idempotency. This documents observed HTTP behavior only; it
+claims no UI, remote deployment, or foundation completion.
 
 ## Runner
 
@@ -12,12 +12,15 @@ deployment and no foundation completion.
 python scripts/test-auth-http.py
 ```
 
-Requires the local stack (`pnpm db:start`), Docker and Python 3 (standard
-library only). The runner creates tagged fixtures (GoTrue users, profile rows,
-vehicles, rotation participants), probes the HTTP surface and removes what it
-created. `protect_last_active_owner` keeps one owner fixture by design; the
-runner reports it and `pnpm db:reset` clears it. The last captured run reported
-`110 checks, 0 failures`.
+Requires Docker, Python 3 (standard library only), the local Supabase CLI, and
+the service images already cached locally. The runner creates a uniquely named
+temporary project with its own ports, database, Auth, Kong, and PostgREST; it
+copies the current migrations and database tests, disables unrelated services,
+and removes its containers, volumes, networks, and temporary files in teardown.
+It does not start, reset, or seed the shared local project, and does not connect
+to a hosted project. HTTP requests are restricted to the exact loopback origin;
+proxy inheritance and redirects are disabled. Output omits credentials and
+response payloads.
 
 ## How a role is selected
 
@@ -56,6 +59,13 @@ found but the parameters do not match.
 | `report_inquiry_sale` | `p_inquiry_id`, `p_vehicle_id` |
 | `resolve_sale_review` | `p_review_id`, `p_confirm` |
 | `reopen_inquiry` | `p_inquiry_id` |
+| `set_dealership_opening_hours` | `p_intervals` |
+| `create_inquiry_visit` | `p_submission_id`, `p_inquiry_id`, `p_vehicle_id`, `p_scheduled_at`, `p_purpose` (optional) |
+| `submit_visit_request` | `p_submission_id`, `p_vehicle_id`, `p_phone`, `p_name`, `p_email`, `p_scheduled_at`, `p_purpose` (optional) |
+| `set_visit_status` | `p_visit_id`, `p_status`, `p_reason` (optional) |
+| `reschedule_visit` | `p_visit_id`, `p_scheduled_at`, `p_agreed` |
+| `get_visit_reporting_summary` | `p_kind`, `p_start`, `p_end` (optional) |
+| `get_my_visit_reporting_summary` | `p_kind`, `p_start`, `p_end` (optional) |
 
 All RPCs are `POST /rest/v1/rpc/<name>`.
 
@@ -114,6 +124,33 @@ call.
 | `POST /rest/v1/vehicles` | `201`, row stored as `published` |
 | `create_manual_inquiry` | `200`, inquiry stored once |
 
+### Visit and reporting HTTP checks
+
+The runner exercises visit endpoints with actual JWTs for Owner, Admin, assigned
+and unassigned Sellers, inactive staff, an identity without a profile, anon,
+and `service_role`:
+
+| Behavior | Observed result |
+| --- | --- |
+| Owner configures opening hours; assigned Seller creates a private visit | Accepted; one visit and one creation record persist |
+| Repeated private creation request | Returns the original visit without adding data or changing the original intent |
+| Anon/service-role visit operations; Seller opening-hours configuration; unauthorized Seller/ghost/inactive private create, transition, and reschedule | Strict expected HTTP/auth errors; all-public-table hash is unchanged after each rejected write |
+| Anon reads visit, history, creation-ledger, or opening-hours tables | Denied; public table hash unchanged |
+| Assigned Seller, Owner and Admin read authorized visit details | Allowed; other, ghost and inactive users see no private details |
+| Assigned Seller confirms/cancels; Admin reschedules; Owner corrects the final result | Accepted through the documented operations and exact resulting state |
+| Owner/Admin global and Seller historical reporting | Correct scopes and attribution; former assignee retains historical figures but cannot inspect visit details |
+| Trusted service role submits public visit request | Accepted-only response; repeat is idempotent; exactly one new visit persists |
+| Owner blocks a vehicle with a pending visit | Only the pending visit is cancelled; the existing final result remains unchanged |
+
+The HTTP run exposed an opening-hours RPC failure (`400`, SQLSTATE `21000`,
+`DELETE requires a WHERE clause`) that pgTAP alone had not caught. Additive
+migration `20261106210000_visit_opening_hours_safe_update.sql` supplies the
+constraint-equivalent weekday predicate `weekday between 0 and 6`; this includes
+all rows permitted by the table constraint and preserves atomic whole-schedule
+replacement. The historical migration and authorization/locking rules are
+unchanged. The complete pgTAP suite then passed **1679/1679 across 35 files**
+on a separate disposable stack.
+
 ### Authenticated identity without a profile ("ghost")
 
 | Surface | Result |
@@ -147,8 +184,8 @@ call.
 - A `PATCH` that matches zero rows (RLS filters the target away) returns `200`
   with an empty representation, not `403`. Authorization is proven by the
   unchanged stored value, not by the status code alone.
-- Denied calls left the database state hash unchanged in every section of the
-  run: anon, non-staff identities and `service_role` denials wrote nothing.
+- Denied calls left the all-public-table database state hash unchanged in every
+  tested section: anon, unauthorized staff identities and `service_role`.
 - `submit_inquiry` through `service_role` returns `{"accepted": true}` and is
   idempotent on `p_submission_id` over HTTP: a repeat returns `200` and stores
   no second row.
@@ -168,4 +205,5 @@ call.
 ## Verification
 
 - `python scripts/test-auth-http.py`
-- `pnpm db:test` (pgTAP suite, unchanged by this slice)
+- `python -m unittest discover -s scripts -p test_http_support.py` (5/5)
+- `python scripts/test-http-db.py` (1679/1679 across 35 files, disposable project)
