@@ -1,6 +1,6 @@
 # Verification strategy
 
-Status: strategy for business flows. The local stack now applies twenty versioned migrations. Current database suite: 1348/1348 assertions across twenty-seven files (the historical 1106/1106 across twenty-one files was the T5b-era total and is superseded). The inquiry and sale slices had observed missing-table and missing-function RED failures. Previous verified checks: pnpm frozen-lockfile installation, typechecks, production builds, loopback HTTP smoke checks, Supabase REST `200`, Auth health `200`, rejected public signup `422`, and real API enforcement (`/rest/v1/vehicles` `200 []` and `/rest/v1/profiles` `401` with the anon key).
+Status: strategy and evidence history for backend flows. The latest isolated database suite passed 1679/1679 assertions across 35 files, and the latest genuine-JWT HTTP run passed 203 checks; see [Auth/PostgREST/JWT verification](auth-http.md). These used disposable local Supabase projects and did not reconcile or reset the shared development stack. Older per-slice counts below are historical unless superseded by a later entry. The inquiry and sale slices had observed missing-table and missing-function RED failures. Previous verified checks also include frozen-lockfile installation, typechecks, production builds, and loopback HTTP smoke checks.
 
 ## Verified public-capture checks
 
@@ -35,6 +35,22 @@ T8: public vehicle-detail capture boundary with server-side known-bot User-Agent
 ## Verified Auth/PostgREST HTTP checks
 
 T7: real HTTP verification with genuine GoTrue users and JWTs (admin API plus password grant), never simulated `set role` claims. Runner `python scripts/test-auth-http.py` (standard library, local stack required): **110 checks, 0 failures**, three consecutive runs, then a final captured run saved under the operator's temp directory. Sections: transport identity (`401` missing key, `401 PGRST301` malformed bearer, `422 signup_disabled`, `403 not_admin`), anonymous table exposure over twelve tables and RPC exposure over all fifteen application RPCs, seller/owner/ghost/inactive JWT enforcement on RLS and RPCs with a state hash unchanged after every denied section, and the `service_role` boundary (`record_vehicle_view` `200 True` then `200 False` dedup, direct reads `403`). Also verified: idempotent `submit_inquiry` over HTTP, owner inventory insert `201`, manual inquiry `200`, own-summary restricted key set, admin summary attribution and `relation_not_causality`. Doc defect corrected in the same slice: `docs/reporting.md` and `docs/vehicle-views.md` documented RPC parameter names without the `p_` prefix, which PostgREST rejects with `404 PGRST202`. Contract and full matrix: [auth-http](auth-http.md). pgTAP suite unchanged at 1348/1348 across 27 files after `pnpm db:reset`. This supersedes the "Auth HTTP" pending item above; visits and UI remain pending (public capture and bot filtering closed by T8 above).
+
+## Latest HTTP/JWT verification (2026-11-06)
+
+The updated runner uses actual GoTrue-issued JWTs and a uniquely named disposable
+Supabase project, not the shared development database. It passed **203 checks,
+0 failures**, including the prior transport/RLS/CRM coverage and visit creation,
+private retry idempotency, authorization denial hashes, detail access, status
+changes, rescheduling, visit reporting, trusted public submission, and
+pending-visit cancellation when a vehicle is blocked. The HTTP run caught the
+opening-hours `DELETE requires a WHERE clause` failure; the additive migration
+`20261106210000_visit_opening_hours_safe_update.sql` fixed it with a predicate
+equivalent under the weekday constraint, without changing the schedule contract.
+The full isolated pgTAP suite then passed **1679/1679 across 35 files**. Five
+HTTP-support unit tests passed. Details and commands: [auth-http](auth-http.md).
+The shared development migration ledger, browser/UI, and remote environments
+remain outside this verification.
 
 ## Verified database checks
 

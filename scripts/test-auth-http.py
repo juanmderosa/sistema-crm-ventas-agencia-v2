@@ -1,15 +1,11 @@
-"""Verify real Auth/PostgREST/JWT enforcement against the running local stack.
+"""Verify Auth/PostgREST/JWT enforcement in a disposable local stack.
 
 Usage: python scripts/test-auth-http.py
-Requires the local Supabase stack (`pnpm db:start`), Docker and Python 3.
+Requires cached Supabase images, Docker, pnpm and Python 3.
 Standard library only; no PowerShell scripts are executed.
 
-The runner creates tagged local fixtures (GoTrue users, profile rows, vehicles
-and rotation participants), probes the real HTTP surface with genuine JWTs
-issued by GoTrue, then removes what it created. The database's own
-`protect_last_active_owner` rule keeps the last active Owner profile, so the
-runner reports any retained fixture instead of bypassing the rule; `pnpm db:reset`
-clears it.
+The parent owns a fresh project and removes its entire stack in finally,
+including when fixture creation or a probe fails. Development data is not used.
 """
 import base64
 import json
@@ -21,6 +17,12 @@ import sys
 import urllib.error
 import urllib.request
 import uuid
+from pathlib import Path
+from http_test_support import error_matches, local_origin, NoRedirect, isolated_run, owned_context
+
+if not os.environ.get('HTTP_JWT_WORKDIR'):
+    sys.exit(isolated_run(Path(__file__).resolve()))
+WORKDIR, CONTEXT = owned_context()
 
 try:
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -28,7 +30,7 @@ except Exception:  # noqa: BLE001
     pass
 
 Pnpm = 'pnpm.cmd' if os.name == 'nt' else 'pnpm'
-PSQL = ['docker', 'exec', '-i', 'supabase_db_dealership-mvp', 'psql', '-X', '-A', '-t',
+PSQL = ['docker', 'exec', '-i', 'supabase_db_' + CONTEXT['project'], 'psql', '-X', '-A', '-t',
         '-q', '-v', 'ON_ERROR_STOP=1', '-U', 'postgres']
 TAG = 'auth' + uuid.uuid4().hex[:8]
 PASSWORD = secrets.token_urlsafe(18)
@@ -41,15 +43,11 @@ RETAINED = []
 
 def check(name, ok, obs='', full=None):
     ok = bool(ok)
-    text = str(obs)
-    if len(text) > 160:
-        text = text[:160] + '...'
     if not ok:
-        FAILURES.append('%s | observed: %s' % (name, text))
-        if full is not None:
-            print('DEBUG %s: %s' % (name, json.dumps(full, ensure_ascii=False)), flush=True)
+        FAILURES.append(name)
     RESULTS.append((name, ok))
-    print('%s %s | %s' % ('PASS' if ok else 'FAIL', name, text), flush=True)
+    # Never log payloads, JWTs, passwords or customer/profile fields.
+    print('%s %s' % ('PASS' if ok else 'FAIL', name), flush=True)
 
 
 def sql(query, fatal=True):
@@ -57,9 +55,8 @@ def sql(query, fatal=True):
                          encoding='utf-8', timeout=60)
     if run.returncode != 0:
         if fatal:
-            raise SystemExit('SQL failed (%s)\n%s\n%s'
-                             % (run.returncode, query[:400], run.stderr.strip()[:400]))
-        RETAINED.append('%s -> %s' % (query[:60], run.stderr.strip()[:120]))
+            raise SystemExit('SQL probe failed (%s); details suppressed' % run.returncode)
+        RETAINED.append('SQL probe failed; details suppressed')
         return None
     return run.stdout.strip()
 
@@ -71,17 +68,7 @@ def has_column(table, column):
 
 
 def state_hash():
-    return sql(
-        "select md5(concat("
-        "coalesce((select string_agg(id::text||role::text||is_active::text, ',' order by id) "
-        "from public.profiles), ''), '|', "
-        "coalesce((select string_agg(id::text||publication_status::text||availability_status::text||"
-        "coalesce(deleted_at::text,''), ',' order by id) from public.vehicles), ''), '|', "
-        "coalesce((select string_agg(id::text||coalesce(assignee_id::text,'')||submission_id::text, "
-        "',' order by id) from public.inquiries), ''), '|', "
-        "coalesce((select string_agg(normalized_phone, ',' order by id) from public.contacts), ''), '|', "
-        "coalesce((select string_agg(vehicle_id::text||profile_id::text, ',' order by vehicle_id) "
-        "from public.vehicle_inquiry_participants), '')));")
+    return sql('select public.http_probe_state_hash();')
 
 
 def decode(token):
@@ -104,7 +91,7 @@ def call(method, path, key=None, token=None, body=None, extra=None):
         headers.update(extra)
     request = urllib.request.Request(API + path, data=data, headers=headers, method=method)
     try:
-        with urllib.request.urlopen(request, timeout=30) as response:
+        with urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect).open(request, timeout=30) as response:
             code, raw = response.status, response.read().decode('utf-8', 'replace')
     except urllib.error.HTTPError as error:
         code, raw = error.code, error.read().decode('utf-8', 'replace')
@@ -120,12 +107,12 @@ def rpc(name, token, body, key=None):
     return call('POST', '/rest/v1/rpc/' + name, key=key or ANON, token=token, body=body)
 
 
-def denied(name, code, body, allowed=(400, 401, 403, 404, 405, 409, 422)):
-    check(name, code in allowed, '%s %s' % (code, str(body)[:140]))
+def denied(name, code, body, statuses=(401, 403), codes=('42501',)):
+    check(name, error_matches(code, body, statuses, codes))
 
 
 # --- environment ------------------------------------------------------------
-status = subprocess.run([Pnpm, 'db:status', '-o', 'env'], capture_output=True,
+status = subprocess.run([Pnpm, 'exec', 'supabase', '--workdir', str(WORKDIR), 'status', '-o', 'env'], capture_output=True,
                         text=True, encoding='utf-8', timeout=180)
 raw_env = status.stdout + '\n' + status.stderr
 
@@ -137,9 +124,20 @@ def var(name):
     return match.group(1).strip().strip('"')
 
 
-API = var('API_URL')
+API = local_origin(var('API_URL'), CONTEXT['port'])
 ANON = var('ANON_KEY')
 SERVICE = var('SERVICE_ROLE_KEY')
+sql("""create function public.http_probe_state_hash() returns text language plpgsql as $$
+declare r record; h text=''; value text;
+begin
+ for r in select tablename from pg_tables where schemaname='public' order by tablename loop
+  execute format('select coalesce(string_agg(row_to_json(t)::text,''|'' order by row_to_json(t)::text),'''') from public.%I t',r.tablename) into value;
+  h:=h||r.tablename||value;
+ end loop;
+ return md5(h);
+end$$;
+revoke all on function public.http_probe_state_hash() from public,anon,authenticated,service_role;
+""")
 
 # The reporting calendar runs on America/Argentina/Buenos_Aires (docs/reporting.md).
 # Anchor on the database's own clock in that zone: the previous UTC date falls in
@@ -150,7 +148,7 @@ START = sql("select to_char(current_timestamp at time zone "
 
 # --- fixtures ---------------------------------------------------------------
 users = {}
-for role in ('owner', 'seller1', 'seller2', 'ghost', 'inactive'):
+for role in ('owner', 'admin', 'seller1', 'seller2', 'ghost', 'inactive'):
     code, body = call('POST', '/auth/v1/admin/users', key=SERVICE, token=SERVICE,
                       body={'email': '%s_%s@example.com' % (TAG, role),
                             'password': PASSWORD, 'email_confirm': True})
@@ -178,8 +176,9 @@ insert into public.vehicle_inquiry_participants (vehicle_id, profile_id) values
        'inactive': users['inactive'], 'tag': TAG, 'vpub': V_PUB, 'vdraft': V_DRAFT,
        'vdel': V_DELETED})
 
+sql("insert into public.profiles(id,role,display_name) values ('%s','admin','HTTP Admin');" % users['admin'])
 tokens = {}
-for role in ('owner', 'seller1', 'seller2', 'ghost', 'inactive'):
+for role in ('owner', 'admin', 'seller1', 'seller2', 'ghost', 'inactive'):
     code, body = call('POST', '/auth/v1/token?grant_type=password', key=ANON,
                       body={'email': '%s_%s@example.com' % (TAG, role), 'password': PASSWORD})
     check('fixture sign-in %s' % role, code == 200, '%s %s' % (code, str(body)[:140]))
@@ -203,14 +202,14 @@ check('A3 service key carries role service_role',
 code, body = call('GET', '/rest/v1/profiles')
 denied('A4 request without apikey rejected', code, body)
 code, body = call('GET', '/rest/v1/profiles', key=ANON, token='not-a-jwt')
-denied('A5 malformed bearer token rejected', code, body)
+denied('A5 malformed bearer token rejected', code, body, (401,), ('PGRST301',))
 code, body = call('POST', '/auth/v1/signup', key=ANON,
                   body={'email': '%s_intruder@example.com' % TAG, 'password': PASSWORD})
-denied('A6 public signup rejected', code, body)
+denied('A6 public signup rejected', code, body, (422,), ('signup_disabled',))
 code, body = call('POST', '/auth/v1/admin/users', key=ANON, token=ANON,
                   body={'email': '%s_intruder@example.com' % TAG,
                         'password': PASSWORD, 'email_confirm': True})
-denied('A7 anon cannot create Auth users', code, body)
+denied('A7 anon cannot create Auth users', code, body, (403,), ('not_admin',))
 
 # --- B. anonymous table exposure -------------------------------------------
 for table in ('profiles', 'inquiries', 'contacts', 'reservations', 'sale_reviews',
@@ -330,7 +329,7 @@ for role in ('seller1', 'seller2'):
                       extra={'Prefer': 'return=representation'})
     kept = sql("select display_name from public.profiles where id = '%s';" % users[role])
     check('E %s cannot rewrite its own profile row' % role,
-          (code >= 400 or body == []) and kept == '%s_%s' % (TAG, role),
+          ((code == 200 and body == []) or error_matches(code, body)) and kept == '%s_%s' % (TAG, role),
           '%s / display_name=%s' % (code, kept))
     code, body = call('POST', '/rest/v1/profiles', key=ANON, token=token,
                       body={'id': str(uuid.uuid4()), 'display_name': 'intruder',
@@ -338,7 +337,7 @@ for role in ('seller1', 'seller2'):
     denied('E %s cannot insert a profile' % role, code, body)
     code, body = call('DELETE', '/rest/v1/profiles?id=eq.%s' % users[role], key=ANON, token=token)
     gone = sql("select count(*) from public.profiles where id = '%s';" % users[role])
-    check('E %s cannot delete its own profile' % role, code >= 400 and gone == '1',
+    check('E %s cannot delete its own profile' % role, error_matches(code, body) and gone == '1',
           '%s / rows=%s' % (code, gone))
     code, body = call('POST', '/rest/v1/vehicles', key=ANON, token=token,
                       body={'id': V_ATTEMPT, 'brand': 'Intruder', 'model': 'Probe',
@@ -348,7 +347,7 @@ for role in ('seller1', 'seller2'):
                       body={'year': 1999}, extra={'Prefer': 'return=representation'})
     year = sql("select year::text from public.vehicles where id = '%s';" % V_DRAFT)
     check('E %s cannot rewrite inventory rows' % role,
-          (code >= 400 or body == []) and year == '2024',
+          ((code == 200 and body == []) or error_matches(code, body)) and year == '2024',
           '%s / year=%s' % (code, year))
 
 code, body = rpc('get_my_reporting_summary', tokens['ghost'],
@@ -448,6 +447,7 @@ second = rpc('record_vehicle_view', SERVICE,
 check('G repeated view from the same browser token is deduplicated',
       code == 200 and body is True and second == (200, False),
       '%s %s / repeat %s %s' % (code, str(body)[:40], second[0], str(second[1])[:40]))
+SNAP2 = state_hash()  # Successful view writes precede the rejected-call baseline.
 for table in ('vehicle_view_events', 'vehicle_view_dedup', 'profiles'):
     code, body = call('GET', '/rest/v1/%s?limit=1' % table, key=SERVICE, token=SERVICE)
     denied('G service role cannot read %s directly' % table, code, body)
@@ -462,50 +462,10 @@ code, body = call('POST', '/rest/v1/vehicles', key=SERVICE, token=SERVICE,
 denied('G service role has no inventory insert grant', code, body)
 check('G denied service-role calls changed no data', state_hash() == SNAP2, state_hash())
 
-# --- cleanup ----------------------------------------------------------------
-sql("delete from public.inquiry_assignment_history where inquiry_id in "
-    "(select id from public.inquiries where originating_vehicle_id in "
-    "('%s','%s','%s') or assignee_id in ('%s','%s','%s'));"
-    % (V_PUB, V_DRAFT, V_DELETED, users['owner'], users['seller1'], users['seller2']),
-    fatal=False)
-sql("delete from public.inquiry_interests where inquiry_id in "
-    "(select id from public.inquiries where originating_vehicle_id in "
-    "('%s','%s','%s') or assignee_id in ('%s','%s','%s'));"
-    % (V_PUB, V_DRAFT, V_DELETED, users['owner'], users['seller1'], users['seller2']),
-    fatal=False)
-for table in ('inquiry_closure_attribution', 'inquiry_first_responsibilities',
-              'inquiry_responsibility_tracking'):
-    if has_column(table, 'inquiry_id'):
-        sql("delete from public.%s where inquiry_id in (select id from public.inquiries "
-            "where originating_vehicle_id in ('%s','%s','%s') or assignee_id in "
-            "('%s','%s','%s'));" % (table, V_PUB, V_DRAFT, V_DELETED, users['owner'],
-                                    users['seller1'], users['seller2']), fatal=False)
-sql("delete from public.inquiries where originating_vehicle_id in ('%s','%s','%s') "
-    "or assignee_id in ('%s','%s','%s') or submitted_phone in ('%s','%s');"
-    % (V_PUB, V_DRAFT, V_DELETED, users['owner'], users['seller1'], users['seller2'],
-       PHONE_A, PHONE_B), fatal=False)
-sql("delete from public.contacts where normalized_phone in ('%s','%s');" % (PHONE_A, PHONE_B),
-    fatal=False)
-sql("delete from public.vehicle_inquiry_participants where vehicle_id in ('%s','%s','%s');"
-    % (V_PUB, V_DRAFT, V_DELETED), fatal=False)
-sql("delete from public.vehicle_inquiry_rotation where vehicle_id in ('%s','%s','%s');"
-    % (V_PUB, V_DRAFT, V_DELETED), fatal=False)
-for table in ('vehicle_view_events', 'vehicle_view_dedup'):
-    if has_column(table, 'vehicle_id'):
-        sql("delete from public.%s where vehicle_id in ('%s','%s','%s');"
-            % (table, V_PUB, V_DRAFT, V_DELETED), fatal=False)
-sql("delete from public.vehicles where id in ('%s','%s','%s','%s','%s');"
-    % (V_PUB, V_DRAFT, V_DELETED, V_OWNER, V_ATTEMPT), fatal=False)
-sql("delete from public.profiles where display_name like '%s%%' and role <> 'owner';" % TAG,
-    fatal=False)
-sql("delete from public.profiles where display_name like '%s%%';" % TAG, fatal=False)
-for role in ('owner', 'seller1', 'seller2', 'ghost', 'inactive'):
-    sql("delete from auth.users where email = '%s_%s@example.com';" % (TAG, role), fatal=False)
-owner_left = sql("select count(*) from public.profiles where display_name like '%s%%';" % TAG,
-                 fatal=False)
-if owner_left not in ('0', None):
-    RETAINED.append('one owner fixture profile and its Auth identity are retained by '
-                    'protect_last_active_owner; `pnpm db:reset` clears them')
+from http_visit_cases import run_visit_probes
+run_visit_probes(globals())
+
+# Parent context removes this entire owned stack even after an exception.
 
 # --- summary ----------------------------------------------------------------
 print('\n%d checks, %d failures' % (len(RESULTS), len(FAILURES)))
