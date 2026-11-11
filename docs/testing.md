@@ -1,6 +1,6 @@
 # Verification strategy
 
-Status: strategy and evidence history for backend flows. The latest isolated database suite passed 1679/1679 assertions across 35 files, and the latest genuine-JWT HTTP run passed 203 checks; see [Auth/PostgREST/JWT verification](auth-http.md). These used disposable local Supabase projects and did not reconcile or reset the shared development stack. Older per-slice counts below are historical unless superseded by a later entry. The inquiry and sale slices had observed missing-table and missing-function RED failures. Previous verified checks also include frozen-lockfile installation, typechecks, production builds, and loopback HTTP smoke checks.
+Status: strategy and evidence history for backend flows. The latest isolated database suite passed 1854/1854 assertions across 37 files (including initial Owner bootstrap and invitation-intent fixtures; this does not complete account HTTP/acceptance/session verification), and the latest genuine-JWT HTTP run passed 203 checks; see [Auth/PostgREST/JWT verification](auth-http.md). These used disposable local Supabase projects and did not reconcile or reset the shared development stack. Older per-slice counts below are historical unless superseded by a later entry. The inquiry and sale slices had observed missing-table and missing-function RED failures. Previous verified checks also include frozen-lockfile installation, typechecks, production builds, and loopback HTTP smoke checks.
 
 ## Verified public-capture checks
 
