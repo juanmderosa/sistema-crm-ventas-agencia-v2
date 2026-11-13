@@ -37,8 +37,17 @@ and two sequence states, with four observed-lock races and zero subsequent test-
 corrections. The owned stack and scratch were removed. Parent syntax-only and
 whitespace spot checks passed. The first failed attempt remains in the contract;
 the later pass is not a recovery of lost historical source bytes.
-TypeScript/build are not applicable to this SQL-only unit. No native approval,
-feature completion or publishing is claimed.
+Source commit `cb52f4b` assessed reviewDue=false/under_budget. Durable proof commit
+`7c23446` assessed reviewDue=true. Initial reviewer launches stopped before execution
+on missing effective routing; those failed preparations remain in the task log.
+After the user explicitly applied the existing profile to this session, all four
+native lenses ran with `openai-codex/gpt-6.1-sol` and the final event approved.
+Exact acknowledgement burned `review-b6d1a979e7046340` at consumed revision
+`sha256:16faf5ee5790825267dd7196c95cc80f1cfb792ce649cea5fce1365b3b2ad790`.
+No functional or independent verification was repeated for this closure. The clean
+registered review worktree was restored to its original commit. TypeScript/build
+are not applicable to this SQL-only unit. Native approval covers the proof slice,
+not a complete invitation journey, publishing or deferred T5.
 
 ## Verified public-capture checks
 
