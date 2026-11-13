@@ -1,6 +1,20 @@
 # Verification strategy
 
-Status: strategy and evidence history for backend flows. The latest isolated database suite passed 2164/2164 assertions across 39 files (including initial Owner bootstrap, invitation intents, pending-identity binding and private completion; this does not complete the invitation acceptance/password orchestration or email verification), and the latest genuine-JWT HTTP run passed 203 checks; see [Auth/PostgREST/JWT verification](auth-http.md). These used disposable local Supabase projects and did not reconcile or reset the shared development stack. Older per-slice counts below are historical unless superseded by a later entry. The inquiry and sale slices had observed missing-table and missing-function RED failures. Previous verified checks also include frozen-lockfile installation, typechecks, production builds, and loopback HTTP smoke checks.
+Status: strategy and evidence history for backend flows. The latest isolated database suite passed 2365/2365 assertions across 40 files (including initial Owner bootstrap, invitation intents, pending-identity binding, private completion and read-only acceptance preflight; this does not complete the invitation acceptance/password orchestration or email verification), and the latest genuine-JWT HTTP run passed 203 checks; see [Auth/PostgREST/JWT verification](auth-http.md). These used disposable local Supabase projects and did not reconcile or reset the shared development stack. Older per-slice counts below are historical unless superseded by a later entry. The inquiry and sale slices had observed missing-table and missing-function RED failures. Previous verified checks also include frozen-lockfile installation, typechecks, production builds, and loopback HTTP smoke checks.
+
+## Private invitation acceptance preflight (T3b2a)
+
+The new service-only read-only preflight observed interface RED (`42883`, missing
+function, exit 1; prior 39 files passed), then focused **201/201** and full isolated
+**2365/2365 across 40 files**, exit 0. Independent security verification separately
+passed the same durable focused 0040 suite, **201/201**, without a new full-suite or
+old completion-probe replay. All 46 preflight outcomes and the existing completion
+retry preserved full public/Auth-user/identity hashes, counts and sequence state.
+All 33 baseline migrations and the shared helper were unchanged. No concrete
+candidate-caused blocker/advisory was found. Owned resources were removed; parent
+whitespace/source spot check passed. No new race, real Auth/JWT/password, public
+endpoint or end-to-end onboarding proof is claimed. See the
+[acceptance preflight contract](staff-invitation-acceptance.md).
 
 ## Private invitation completion: latest bounded evidence
 
