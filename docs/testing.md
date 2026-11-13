@@ -12,8 +12,13 @@ outside the task; TypeScript AST comparison matched their baseline semantics.
 Parent revalidation of current sources passed the backoffice test command,
 nonincremental strict typecheck and production build (exit 0). No recovery rollback
 or formatting commit was performed. Existing module-type/line-ending warnings are
-not suppressed. Independent security review and real provider integration remain
-pending: mocked fetch tests do not prove actual acceptance/password/JWT/SQL behavior.
+not suppressed. Independent security review passed invitation22/22, combined32/32,
+baseline recovery10/10 and two additional injected-fetch boundary probes, all exit0;
+scoped source bytes matched committed `74fb002` before and after execution. No concrete
+candidate-caused blocker was reproduced. Config capture and awaited cleanup were
+checked for both token paths. The extra probes will be retained in the next proof
+slice. Real provider integration remains pending: mocked fetch tests do not prove
+actual acceptance/password/JWT/SQL behavior.
 No public route, mail, browser, full onboarding or T5 completion is claimed.
 
 ## Private invitation acceptance preflight (T3b2a)

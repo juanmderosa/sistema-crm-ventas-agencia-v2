@@ -81,5 +81,6 @@ The backoffice `test` script retains unchanged recovery tests and includes these
 new tests. Mocks prove request ordering, validation, credential routing and redacted
 results only, not actual Auth sessions/password persistence, JWT permissions, SQL
 atomicity or deployed secret isolation. T3b2c real-Auth service integration remains
-pending, as do public handlers, delivery/resend, mail, UI and deferred T5. This
+pending, as do public handlers, delivery/resend, mail and UI. T5 is reactivated for
+supported-mechanism investigation and feasible implementation. This
 unit is neither complete onboarding nor native approval.
