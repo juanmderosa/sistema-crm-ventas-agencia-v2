@@ -1,8 +1,33 @@
 # Verification strategy
 
-Status: strategy and evidence history for backend flows. The latest isolated database suite passed 2365/2365 assertions across 40 files (including initial Owner bootstrap, invitation intents, pending-identity binding, private completion and read-only acceptance preflight; this does not complete the invitation acceptance/password orchestration or email verification), and the latest genuine-JWT HTTP run passed 203 checks; see [Auth/PostgREST/JWT verification](auth-http.md). These used disposable local Supabase projects and did not reconcile or reset the shared development stack. Older per-slice counts below are historical unless superseded by a later entry. The inquiry and sale slices had observed missing-table and missing-function RED failures. Previous verified checks also include frozen-lockfile installation, typechecks, production builds, and loopback HTTP smoke checks.
+Status: strategy and evidence history for backend flows. The latest isolated database suite passed 2365/2365 assertions across 40 files (including initial Owner bootstrap, invitation intents, pending-identity binding, private completion and read-only acceptance preflight; this does not complete the invitation acceptance/password orchestration or email verification), and the latest general CRM/Auth/JWT HTTP suite passed 203 checks; see [Auth/PostgREST/JWT verification](auth-http.md). These used disposable local Supabase projects and did not reconcile or reset the shared development stack. Older per-slice counts below are historical unless superseded by a later entry. The inquiry and sale slices had observed missing-table and missing-function RED failures. Previous verified checks also include frozen-lockfile installation, typechecks, production builds, and loopback HTTP smoke checks.
 
-## Invitation onboarding service (T3b2b, integration pending)
+## Actual invitation onboarding: dedicated Auth/PostgREST proof (T3b2c)
+
+The actual TypeScript service passed **196/196** live assertions over owned local
+Auth/PostgREST: roles52, invalid30, denials40, interruption42 and lost_response32.
+Fourteen service calls and protected comparisons and eleven observed old-refresh
+`400 refresh_token_not_found` rejections passed. Genuine Seller/Admin password
+login, same-UUID recovery, precommit interruption, postcommit response loss and
+exact retry preserving a later profile-name change were checked. No JWT
+cryptographic invalidation or complete browser/mail journey is claimed.
+
+Original and diagnostic attempts failed a protected-state expectation: only the
+provider-owned `auth.refresh_tokens_id_seq` advanced while public effects/counters
+were correct. ONE evidence-justified test correction permits that forward movement
+only with actual verify200 plus consumed-refresh400 rejection; public counters,
+expected public-table effects and invalid/replay no-provider effects stay strict.
+Both separately authorized continuation stacks were removed; correction/live limits
+are spent. No further live run is implied by this record.
+
+Independent offline security verification found no concrete blocker, passed6 runner
+guards,24/34 mock suites and3 pure-data invariant probes, and did not repeat live
+Auth execution. The supplied pure-data probes are retained; parent syntax and9/9
+offline guards passed. Product/service/helpers/SQL remained unchanged. See the
+[actual-service proof and complete attempt history](invitation-onboarding-http.md).
+Native disposition remains pending; T5 is reactivated and still pending.
+
+## Invitation onboarding service (T3b2b)
 
 The feature-local server service observed missing-module RED and two additional
 origin-validation RED cases before GREEN: **22/22** new unit tests, **32/32** total
@@ -16,9 +41,9 @@ not suppressed. Independent security review passed invitation22/22, combined32/3
 baseline recovery10/10 and two additional injected-fetch boundary probes, all exit0;
 scoped source bytes matched committed `74fb002` before and after execution. No concrete
 candidate-caused blocker was reproduced. Config capture and awaited cleanup were
-checked for both token paths. The extra probes will be retained in the next proof
-slice. Real provider integration remains pending: mocked fetch tests do not prove
-actual acceptance/password/JWT/SQL behavior.
+checked for both token paths. Those extra probes are retained in the dedicated
+proof slice, which separately supplies actual provider evidence above. Mocked
+fetch tests alone do not prove actual acceptance/password/JWT/SQL behavior.
 No public route, mail, browser, full onboarding or T5 completion is claimed.
 
 ## Private invitation acceptance preflight (T3b2a)
