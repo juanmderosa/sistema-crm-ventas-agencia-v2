@@ -2,6 +2,20 @@
 
 Status: strategy and evidence history for backend flows. The latest isolated database suite passed 2365/2365 assertions across 40 files (including initial Owner bootstrap, invitation intents, pending-identity binding, private completion and read-only acceptance preflight; this does not complete the invitation acceptance/password orchestration or email verification), and the latest genuine-JWT HTTP run passed 203 checks; see [Auth/PostgREST/JWT verification](auth-http.md). These used disposable local Supabase projects and did not reconcile or reset the shared development stack. Older per-slice counts below are historical unless superseded by a later entry. The inquiry and sale slices had observed missing-table and missing-function RED failures. Previous verified checks also include frozen-lockfile installation, typechecks, production builds, and loopback HTTP smoke checks.
 
+## Invitation onboarding service (T3b2b, integration pending)
+
+The feature-local server service observed missing-module RED and two additional
+origin-validation RED cases before GREEN: **22/22** new unit tests, **32/32** total
+backoffice tests including the unchanged recovery behavior, and strict typecheck.
+After unexpected formatting, the parent preserved unrelated recovery-file edits
+outside the task; TypeScript AST comparison matched their baseline semantics.
+Parent revalidation of current sources passed the backoffice test command,
+nonincremental strict typecheck and production build (exit 0). No recovery rollback
+or formatting commit was performed. Existing module-type/line-ending warnings are
+not suppressed. Independent security review and real provider integration remain
+pending: mocked fetch tests do not prove actual acceptance/password/JWT/SQL behavior.
+No public route, mail, browser, full onboarding or T5 completion is claimed.
+
 ## Private invitation acceptance preflight (T3b2a)
 
 The new service-only read-only preflight observed interface RED (`42883`, missing
