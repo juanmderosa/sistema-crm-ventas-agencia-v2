@@ -1,6 +1,44 @@
 # Verification strategy
 
-Status: strategy and evidence history for backend flows. The latest isolated database suite passed 1854/1854 assertions across 37 files (including initial Owner bootstrap and invitation-intent fixtures; this does not complete account HTTP/acceptance/session verification), and the latest genuine-JWT HTTP run passed 203 checks; see [Auth/PostgREST/JWT verification](auth-http.md). These used disposable local Supabase projects and did not reconcile or reset the shared development stack. Older per-slice counts below are historical unless superseded by a later entry. The inquiry and sale slices had observed missing-table and missing-function RED failures. Previous verified checks also include frozen-lockfile installation, typechecks, production builds, and loopback HTTP smoke checks.
+Status: strategy and evidence history for backend flows. The latest isolated database suite passed 2164/2164 assertions across 39 files (including initial Owner bootstrap, invitation intents, pending-identity binding and private completion; this does not complete the invitation acceptance/password orchestration or email verification), and the latest genuine-JWT HTTP run passed 203 checks; see [Auth/PostgREST/JWT verification](auth-http.md). These used disposable local Supabase projects and did not reconcile or reset the shared development stack. Older per-slice counts below are historical unless superseded by a later entry. The inquiry and sale slices had observed missing-table and missing-function RED failures. Previous verified checks also include frozen-lockfile installation, typechecks, production builds, and loopback HTTP smoke checks.
+
+## Private invitation completion: latest bounded evidence
+
+The parent isolated SQL suite passed **2164/2164 across 39 files** (exit 0).
+Independent verifier `mwf4m3q7-4-azfr` then passed **109 assertions across 42 checked
+command outcomes** (exit 0): 14 actual permission denials, Admin/Seller role
+retention, permanent completion marks, exact read-only retries, rejected-input
+state preservation, injected insertion-failure rollback, and four observed-lock
+races (completion/completion, both completion/revocation orders, and deactivation
+before completion retry). Thirty-two rejected/read-only outcomes preserved every
+public-table/Auth-user/Auth-identity hash, counts and sequence state; no sequence
+gap or product defect was observed. No probe-code correction was used. Complete
+Python syntax/entrypoint checks passed before stack creation; two scratch-only
+escape warnings remain recorded. The sole owned stack was removed and its absence
+confirmed; repository files were unchanged by the verifier. Earlier rejected or
+preparation-failed attempts remain in `odd/tasks/accounts-access.md`.
+
+This is **SQL-role proof for the private primitive**, not actual Auth/JWT,
+acceptance/password, resend, mail or browser evidence. T5 deactivation/session
+revocation remains user-deferred. The verifier reported executed probes in scratch, but the subsequent authorized
+retention worker found all six sources missing (ENOENT), so exact source parity
+could not be established. No tests were reconstructed or repeated. Repository
+retention, functional parent spot check and applicable native review remain pending;
+the original execution result above is reported evidence, not retained runnable proof.
+A later explicitly authorized writer created NEW durable regression sources under
+`scripts/staff_completion_probe/` and their [run contract](staff-invitation-completion.md).
+These are not recovered historical sources. Compilation and the parent syntax-only
+spot check passed; the first new functional invocation failed in preflight before
+setup, with zero assertions, outcomes or observed waits. No stack was created,
+no correction was used, and no setup retry or repeated independent run occurred.
+The separately authorized preparation correction then passed all NEW durable groups:
+**258 assertions / 76 outcomes**, 35 protected-state comparisons across 27 tables
+and two sequence states, with four observed-lock races and zero subsequent test-code
+corrections. The owned stack and scratch were removed. Parent syntax-only and
+whitespace spot checks passed. The first failed attempt remains in the contract;
+the later pass is not a recovery of lost historical source bytes.
+TypeScript/build are not applicable to this SQL-only unit. No native approval,
+feature completion or publishing is claimed.
 
 ## Verified public-capture checks
 

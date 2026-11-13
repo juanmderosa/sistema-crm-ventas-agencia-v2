@@ -82,7 +82,35 @@ that evidence. Until that contract is implemented and proven against the actual
 Auth version, activation must remain unavailable. Future profile creation must
 reuse existing Owner/bootstrap/profile invariants and appropriate lock ordering.
 
-## Verification status
+## Private completion primitive (T3b1)
+
+`complete_staff_invitation(p_invitation_id uuid, p_user_id uuid,
+p_display_name text)` is service-only. It uses the existing invitation advisory
+namespace and immutable pending-identity binding, checks confirmed email and
+server provenance, and atomically inserts the active invitation-role profile and
+permanent completion marker. Names must be nonblank and at most 200 characters.
+No direct API-role grants expose the completion table.
+
+Exact retries preserve the original name and identity without restoring later
+profile role/activation changes. Changed-name retries reject. A revoked pending
+invitation cannot create a profile; accepted completions are not undone by later
+revocation. Failed completion-marker insertion rolls back profile creation.
+
+This primitive trusts the server to verify the acceptance session and successful
+password update for the bound UUID before calling it. The approved sequence is
+confirmed password update followed by awaited private completion; interruptions
+resume through recovery without an operational profile. Neither a password hash
+nor caller assertions establish that evidence. No browser endpoint currently
+exposes completion; actual acceptance/password/resend/mail remain separate work.
+T5 session revocation remains deferred.
+
+The parent isolated suite passed 2164 assertions across 39 files. Independent
+private-primitive probes passed 109 assertions / 42 outcomes, and separately NEW
+durable regressions passed 258 assertions / 76 outcomes, including rollback and
+four observed-lock races. These are SQL-role/synthetic checks, not genuine
+Auth/JWT onboarding proof. Earlier failures remain in the feature task log.
+
+## Verification status (original intent slice)
 
 `supabase/tests/0037_staff_invitation_intents_test.sql` uses synthetic fixtures and
 transaction rollback, public RPC calls, exact SQLSTATE/message assertions and
