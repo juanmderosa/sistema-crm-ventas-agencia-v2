@@ -410,6 +410,15 @@ No account lifecycle or concurrency redesign.
 
 ## Bound invitation resend preparation (T3b3a)
 
+Independent verification of `cd6e57d..515df9b` passed the focused **216/216**
+checks in a fresh minimal isolated copy, with no blocker and 78 source/config/helper
+files preserved. A separate parent-owned focused spot check also passed
+**216/216**, exit 0. Both verified owned resource and generated-directory removal.
+The full **2581/41** suite and four differentials remain writer-owned evidence,
+not independent reruns. Exact-range native assessment returned `reviewDue=false`
+(`under_budget`), not native approval; security escalation required and received
+independent verification. No transport, email, concurrency or T5 proof is claimed.
+
 Observed interface RED: focused 0041 exited 1 at `42883`, missing
 `prepare_bound_staff_invitation_resend(uuid,uuid,uuid)`, after nine prerequisite
 assertions passed. Later assertions did not run during RED. Initial GREEN passed
