@@ -45,6 +45,13 @@ Offline guards passed 3/3 after missing-interface RED; one first-GREEN failure
 was the known Node module-type warning, corrected without suppressing warnings.
 The unchanged management suite passed 57/57. No live correction was needed.
 
+Independent verification passed the offline guards **3/3** and bridge syntax in
+a minimal isolated copy; the parent separately passed **3/3**. The live run remains
+writer-owned evidence, not an independent rerun. Native four-lens review
+`review-d8c2abad7634ce57` approved this slice; its exact acknowledgement consumed
+authority at revision `a3f73cc344e7258e0c1301bead00bbb5f6af9edd919ec01316efb0f81c2649fe`.
+No delivery permission follows from that review.
+
 This supports S1–S5 preparation only. Existing SQL-role 216-assertion evidence is
 separate. Full S4 delivery, mail/browser journeys and T5/S6–S7 remain unproved and
 blocked/pending as tracked; this does not replay the closed onboarding proof.
