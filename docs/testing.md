@@ -25,7 +25,13 @@ guards,24/34 mock suites and3 pure-data invariant probes, and did not repeat liv
 Auth execution. The supplied pure-data probes are retained; parent syntax and9/9
 offline guards passed. Product/service/helpers/SQL remained unchanged. See the
 [actual-service proof and complete attempt history](invitation-onboarding-http.md).
-Native disposition remains pending; T5 is reactivated and still pending.
+Proof commit `12a9934` received approved four-lens native review; exact
+acknowledgement burned `review-e40d76b5e92748bc` at consumed revision
+`sha256:45ff1fef3ba86cdf25b8170164eee79b6118461cbf9b08b1361e44d05eee72d6`.
+The first pre-authority START rejected oversized task-log request context without
+creating a lineage; the offered concise-contract continuation succeeded without
+changing candidate scope or dropping business intent. T5 is reactivated and its
+supported-mechanism investigation is next; no deactivation proof is claimed.
 
 ## Invitation onboarding service (T3b2b)
 
