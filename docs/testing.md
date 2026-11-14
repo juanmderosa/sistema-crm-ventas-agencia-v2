@@ -2,6 +2,16 @@
 
 Status: strategy and evidence history for backend flows. The latest isolated database suite passed 2365/2365 assertions across 40 files (including initial Owner bootstrap, invitation intents, pending-identity binding, private completion and read-only acceptance preflight; this does not complete the invitation acceptance/password orchestration or email verification), and the latest general CRM/Auth/JWT HTTP suite passed 203 checks; see [Auth/PostgREST/JWT verification](auth-http.md). These used disposable local Supabase projects and did not reconcile or reset the shared development stack. Older per-slice counts below are historical unless superseded by a later entry. The inquiry and sale slices had observed missing-table and missing-function RED failures. Previous verified checks also include frozen-lockfile installation, typechecks, production builds, and loopback HTTP smoke checks.
 
+## Genuine bound-resend management preparation (T3b3c1)
+
+The new [owned-stack preparation proof](invitation-management-http.md) exercises
+actual management service bytes, genuine native Auth User GET and private
+PostgREST preparation RPC. Its offline process guards run before isolated setup;
+live case/check/call totals are reported separately from fixture-helper PASS labels.
+Strict protected-state and journal-only assertions do not use the historical
+refresh-counter exception. No source, SQL, old proof or helper is changed.
+This is preparation evidence only, not full S4 delivery, mail or T5 completion.
+
 ## Actual invitation onboarding: dedicated Auth/PostgREST proof (T3b2c)
 
 The actual TypeScript service passed **196/196** live assertions over owned local
