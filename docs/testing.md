@@ -407,3 +407,46 @@ No source correction or new functional rerun was needed during native review.
 User authorized a local commit only; no push, merge or deployment. SQL-role
 proof only; real JWT HTTP verification is a separate follow-up audit task.
 No account lifecycle or concurrency redesign.
+
+## Bound invitation resend preparation (T3b3a)
+
+Observed interface RED: focused 0041 exited 1 at `42883`, missing
+`prepare_bound_staff_invitation_resend(uuid,uuid,uuid)`, after nine prerequisite
+assertions passed. Later assertions did not run during RED. Initial GREEN passed
+189/189; the full isolated suite passed 2554/2554 across 41 files.
+Self-review added explicit journal-only success snapshots, binding mismatch and
+reverse old/new action collisions. That expanded focused run exited 1 after 140
+passing assertions: the mismatch fixture collided with the existing unique bound
+UUID constraint before reaching the RPC. ONE fixture correction selected an
+already-existing, unbound synthetic actor UUID instead; no production change or
+expectation weakening. Final focused **216/216** and full **2581/2581 across 41
+files** passed, exit 0. No second correction was used.
+
+Commands, each foreground in the owned generated project:
+
+```sh
+pnpm exec supabase test db supabase/tests/0041_staff_invitation_bound_resend_test.sql --workdir "$BOUND_RESEND_WORKDIR"
+pnpm exec supabase test db --workdir "$BOUND_RESEND_WORKDIR"
+'/c/Users/juanm/AppData/Local/Programs/Python/Python313/python.exe' -B "$BOUND_RESEND_DIFFERENTIAL"
+git diff --check
+```
+
+The scratch differential installed the actual base `cd6e57d` legacy function and
+CHECK, read with `git show ...:supabase/migrations/20261107110000_staff_invitation_intents.sql`,
+inside rollback-only transactions of the owned candidate database. It compared
+`psql -X -qAt -v ON_ERROR_STOP=1 -v VERBOSITY=terse` exit/stdout/stderr against the
+candidate. All four comparisons matched: new legacy action `bound_resend` yielded
+exit 3, empty stdout and `ERROR:  Datos de invitación inválidos.`; ordinary create,
+resend and revoke yielded exit 0, identical invitation UUID output and empty
+stderr. The Python comparison command exited 0. No committed test reads history.
+
+SQL-role proof only: actual role denials, full public/Auth-user/identity and
+sequence snapshots, journal-only success, retry revalidation, legacy regressions
+and insertion-failure rollback. Shared helper and historical migrations were not
+edited. One cached-image disposable project used unchanged `http_test_support.py`
+ownership/cleanup; no shared reset, installation or provider request. JS typecheck
+and build are not applicable to this SQL/documentation-only unit. No new race,
+JWT, email, transport, full invitation journey or T5 completion is claimed.
+The first whitespace check exited 2 for one extra EOF blank line in this entry;
+one documentation correction removed it and the check then exited 0. Owned Docker
+container/volume/network and generated project-directory absence were verified.
