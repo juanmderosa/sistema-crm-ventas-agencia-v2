@@ -41,3 +41,34 @@ idempotency does not guarantee exactly-once email. No Auth/provider/HTTP/mail ca
 password update, profile activation or role change is implemented here. Provider
 delivery and actual transport proof remain separate work. T5 remains blocked;
 S6/S7 and the full invitation journey are not completed or waived.
+
+## Trusted current-actor service (T3b3b1, S1–S5)
+
+Server-only `createInvitationManagementService(config, fetcher)` exposes only
+`prepareBoundResend({ requestID, invitationID, actorAccessToken })`. The token must
+come from trusted server-session integration. No caller actor UUID, role, email,
+JWT decoding or metadata is authoritative. Configuration is captured at construction;
+input primitives are captured before awaiting. Fixed origins and credentials use
+onboarding's validation rules; each request rejects redirects and has a fresh,
+cleared 10-second deadline covering fetch and response consumption.
+
+1. GET `/auth/v1/user` uses the ordinary API key and caller bearer token. Only a
+   successful User object's top-level UUID authenticates the actor.
+2. POST `/rest/v1/rpc/prepare_bound_staff_invitation_resend` uses only service-role
+   credentials, with exactly `p_request_id`, `p_invitation_id`, `p_actor_id`.
+   SQL remains the current active-role authority after the namespace wait.
+3. `{ ok: true, code: "prepared", preparation }` means private preparation only.
+   Its frozen six-key payload validates invitation UUID, canonical email,
+   Admin/Seller role, provenance UUID and equal non-null user/candidate UUIDs.
+   This root-canonical reply is **not a public DTO**. A future public route needs
+   a separate fixed acknowledgement, never serialization of this private result.
+
+Failures return only `{ ok: false, code }`: `invalid_input`,
+`authentication_failed`, `denied` (recognized SQLSTATE 22023/42501/23514 in a 4xx
+response), or `preparation_uncertain`. After RPC dispatch, lost/invalid responses,
+timeouts and unrecognized errors are uncertain: the journal **may have committed**.
+There is no automatic retry, no no-effect promise, no delivered claim and no email
+guarantee. Credentials and raw provider errors are never returned. Invalid input
+and failed authentication make no privileged request. No Auth mutation, link,
+recovery, mail, HTTP route or new session platform is added. S4's full resend and
+T5/S6–S7 remain incomplete; existing SQL proof is not replayed by this unit.

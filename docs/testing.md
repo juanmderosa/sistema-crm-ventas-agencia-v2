@@ -459,3 +459,28 @@ JWT, email, transport, full invitation journey or T5 completion is claimed.
 The first whitespace check exited 2 for one extra EOF blank line in this entry;
 one documentation correction removed it and the check then exited 0. Owned Docker
 container/volume/network and generated project-directory absence were verified.
+
+## Current-actor bound-resend service (T3b3b1)
+
+Observed RED: `node --test apps/backoffice/features/accounts/invitations/management.test.ts`
+exited 1 with `ERR_MODULE_NOT_FOUND` for the new management module. Implementation
+then passed 55/55; two self-review cases added Admin/canonical email length and
+simulated post-journal response loss. Final focused **57/57** and full backoffice
+**91/91** passed, exit 0. No ordinary failing-check correction was needed.
+
+Commands, foreground with finite timeouts (pnpm used the authorized process-only
+`export PATH='/c/Users/juanm/AppData/Local/pnpm':"$PATH"` prefix):
+
+- `node --test apps/backoffice/features/accounts/invitations/management.test.ts`: 57/57.
+- `pnpm --filter @dealership/backoffice test`: 91/91, including 34 unchanged regressions.
+- `pnpm --filter @dealership/backoffice typecheck --incremental false`: exit 0.
+- `pnpm --filter @dealership/backoffice build`: exit 0; only `/` and `/_not-found` routes.
+
+Injected-fetch tests check exact requests, credential isolation, authenticated
+UUID source, immutable private reply, snapshot boundaries, redirects, cleared
+independent deadlines and fixed denied/uncertain outcomes. Simulated journal
+persistence is not database-permission or genuine Auth evidence. Existing SQL,
+onboarding and recovery sources/tests are unchanged, so no shared-code
+differential or live proof is required. Existing module-type warnings remain.
+This is private preparation only, not resend delivery, SMTP, a public route,
+end-to-end S4 or T5/S6–S7 completion. Parent independent verification is separate.

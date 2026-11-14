@@ -293,3 +293,15 @@ boundary, not proof of the explicit actor UUID; future server orchestration must
 derive that actor from verified context. No delivery platform, exactly-once email
 guarantee, new product rule or T5/S6/S7 waiver follows from this private primitive.
 See [bound resend contract](staff-invitation-bound-resend.md).
+
+## Authenticated bound-resend preparation service (T3b3b1)
+
+Authenticate the current actor through GET `/auth/v1/user` before privileged
+preparation, rather than trusting browser UUIDs, decoded JWTs or provider role
+metadata. SQL still checks current active business authority after serialization;
+a provider identity alone grants no invitation-management permission. Keep the
+canonical six-field result frozen and private, with a separate future public
+acknowledgement boundary. Treat unknown post-dispatch outcomes as possibly
+journaled, not sent or safely rolled back. This additive service reuses the
+existing RPC, changes no old onboarding/SQL behavior and adds no mail mechanism.
+Actual exact-identity delivery, zero-cost mail gates and T5 remain unresolved.
