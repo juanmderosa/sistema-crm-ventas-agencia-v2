@@ -276,3 +276,32 @@ updates rather than introducing a new RPC, lock order or account lifecycle.
 The existing last-active-Owner trigger and statement-snapshot semantics remain
 unchanged. Historical migrations are not edited; rollback is this policy/grant
 change and its focused tests/docs, not unrelated commercial logic.
+
+## Bound invitation resend preparation (T3b3a)
+
+Reuse the existing private request journal with a distinct `bound_resend` action,
+not ordinary `resend` or a separate delivery ledger. Extend only its action CHECK;
+leave legacy command bodies and input domains unchanged. This preserves global
+request-ID collision handling and old fail-closed Auth-match behavior.
+
+Gate an existing complete binding and absence of permanent completion before
+calling the authoritative identity prepare helper. Derive provenance privately;
+return its canonical immutable payload only after current actor/identity checks,
+including retries. This avoids implicit reservation, duplicated validation and
+confirmation-dependent retry responses. The service credential is a transport
+boundary, not proof of the explicit actor UUID; future server orchestration must
+derive that actor from verified context. No delivery platform, exactly-once email
+guarantee, new product rule or T5/S6/S7 waiver follows from this private primitive.
+See [bound resend contract](staff-invitation-bound-resend.md).
+
+## Authenticated bound-resend preparation service (T3b3b1)
+
+Authenticate the current actor through GET `/auth/v1/user` before privileged
+preparation, rather than trusting browser UUIDs, decoded JWTs or provider role
+metadata. SQL still checks current active business authority after serialization;
+a provider identity alone grants no invitation-management permission. Keep the
+canonical six-field result frozen and private, with a separate future public
+acknowledgement boundary. Treat unknown post-dispatch outcomes as possibly
+journaled, not sent or safely rolled back. This additive service reuses the
+existing RPC, changes no old onboarding/SQL behavior and adds no mail mechanism.
+Actual exact-identity delivery, zero-cost mail gates and T5 remain unresolved.

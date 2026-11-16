@@ -1,6 +1,127 @@
 # Verification strategy
 
-Status: strategy and evidence history for backend flows. The latest isolated database suite passed 1679/1679 assertions across 35 files, and the latest genuine-JWT HTTP run passed 203 checks; see [Auth/PostgREST/JWT verification](auth-http.md). These used disposable local Supabase projects and did not reconcile or reset the shared development stack. Older per-slice counts below are historical unless superseded by a later entry. The inquiry and sale slices had observed missing-table and missing-function RED failures. Previous verified checks also include frozen-lockfile installation, typechecks, production builds, and loopback HTTP smoke checks.
+Status: strategy and evidence history for backend flows. The latest isolated database suite passed 2365/2365 assertions across 40 files (including initial Owner bootstrap, invitation intents, pending-identity binding, private completion and read-only acceptance preflight; this does not complete the invitation acceptance/password orchestration or email verification), and the latest general CRM/Auth/JWT HTTP suite passed 203 checks; see [Auth/PostgREST/JWT verification](auth-http.md). These used disposable local Supabase projects and did not reconcile or reset the shared development stack. Older per-slice counts below are historical unless superseded by a later entry. The inquiry and sale slices had observed missing-table and missing-function RED failures. Previous verified checks also include frozen-lockfile installation, typechecks, production builds, and loopback HTTP smoke checks.
+
+## Genuine bound-resend management preparation (T3b3c1)
+
+The new [owned-stack preparation proof](invitation-management-http.md) exercises
+actual management service bytes, genuine native Auth User GET and private
+PostgREST preparation RPC. Its offline process guards run before isolated setup;
+live case/check/call totals are reported separately from fixture-helper PASS labels.
+Strict protected-state and journal-only assertions do not use the historical
+refresh-counter exception. No source, SQL, old proof or helper is changed.
+This is preparation evidence only, not full S4 delivery, mail or T5 completion.
+
+## Actual invitation onboarding: dedicated Auth/PostgREST proof (T3b2c)
+
+The actual TypeScript service passed **196/196** live assertions over owned local
+Auth/PostgREST: roles52, invalid30, denials40, interruption42 and lost_response32.
+Fourteen service calls and protected comparisons and eleven observed old-refresh
+`400 refresh_token_not_found` rejections passed. Genuine Seller/Admin password
+login, same-UUID recovery, precommit interruption, postcommit response loss and
+exact retry preserving a later profile-name change were checked. No JWT
+cryptographic invalidation or complete browser/mail journey is claimed.
+
+Original and diagnostic attempts failed a protected-state expectation: only the
+provider-owned `auth.refresh_tokens_id_seq` advanced while public effects/counters
+were correct. ONE evidence-justified test correction permits that forward movement
+only with actual verify200 plus consumed-refresh400 rejection; public counters,
+expected public-table effects and invalid/replay no-provider effects stay strict.
+Both separately authorized continuation stacks were removed; correction/live limits
+are spent. No further live run is implied by this record.
+
+Independent offline security verification found no concrete blocker, passed6 runner
+guards,24/34 mock suites and3 pure-data invariant probes, and did not repeat live
+Auth execution. The supplied pure-data probes are retained; parent syntax and9/9
+offline guards passed. Product/service/helpers/SQL remained unchanged. See the
+[actual-service proof and complete attempt history](invitation-onboarding-http.md).
+Proof commit `12a9934` received approved four-lens native review; exact
+acknowledgement burned `review-e40d76b5e92748bc` at consumed revision
+`sha256:45ff1fef3ba86cdf25b8170164eee79b6118461cbf9b08b1361e44d05eee72d6`.
+The first pre-authority START rejected oversized task-log request context without
+creating a lineage; the offered concise-contract continuation succeeded without
+changing candidate scope or dropping business intent. T5 is reactivated and its
+supported-mechanism investigation is next; no deactivation proof is claimed.
+
+## Invitation onboarding service (T3b2b)
+
+The feature-local server service observed missing-module RED and two additional
+origin-validation RED cases before GREEN: **22/22** new unit tests, **32/32** total
+backoffice tests including the unchanged recovery behavior, and strict typecheck.
+After unexpected formatting, the parent preserved unrelated recovery-file edits
+outside the task; TypeScript AST comparison matched their baseline semantics.
+Parent revalidation of current sources passed the backoffice test command,
+nonincremental strict typecheck and production build (exit 0). No recovery rollback
+or formatting commit was performed. Existing module-type/line-ending warnings are
+not suppressed. Independent security review passed invitation22/22, combined32/32,
+baseline recovery10/10 and two additional injected-fetch boundary probes, all exit0;
+scoped source bytes matched committed `74fb002` before and after execution. No concrete
+candidate-caused blocker was reproduced. Config capture and awaited cleanup were
+checked for both token paths. Those extra probes are retained in the dedicated
+proof slice, which separately supplies actual provider evidence above. Mocked
+fetch tests alone do not prove actual acceptance/password/JWT/SQL behavior.
+No public route, mail, browser, full onboarding or T5 completion is claimed.
+
+## Private invitation acceptance preflight (T3b2a)
+
+The new service-only read-only preflight observed interface RED (`42883`, missing
+function, exit 1; prior 39 files passed), then focused **201/201** and full isolated
+**2365/2365 across 40 files**, exit 0. Independent security verification separately
+passed the same durable focused 0040 suite, **201/201**, without a new full-suite or
+old completion-probe replay. All 46 preflight outcomes and the existing completion
+retry preserved full public/Auth-user/identity hashes, counts and sequence state.
+All 33 baseline migrations and the shared helper were unchanged. No concrete
+candidate-caused blocker/advisory was found. Owned resources were removed; parent
+whitespace/source spot check passed. No new race, real Auth/JWT/password, public
+endpoint or end-to-end onboarding proof is claimed. See the
+[acceptance preflight contract](staff-invitation-acceptance.md).
+
+## Private invitation completion: latest bounded evidence
+
+The parent isolated SQL suite passed **2164/2164 across 39 files** (exit 0).
+Independent verifier `mwf4m3q7-4-azfr` then passed **109 assertions across 42 checked
+command outcomes** (exit 0): 14 actual permission denials, Admin/Seller role
+retention, permanent completion marks, exact read-only retries, rejected-input
+state preservation, injected insertion-failure rollback, and four observed-lock
+races (completion/completion, both completion/revocation orders, and deactivation
+before completion retry). Thirty-two rejected/read-only outcomes preserved every
+public-table/Auth-user/Auth-identity hash, counts and sequence state; no sequence
+gap or product defect was observed. No probe-code correction was used. Complete
+Python syntax/entrypoint checks passed before stack creation; two scratch-only
+escape warnings remain recorded. The sole owned stack was removed and its absence
+confirmed; repository files were unchanged by the verifier. Earlier rejected or
+preparation-failed attempts remain in `odd/tasks/accounts-access.md`.
+
+This is **SQL-role proof for the private primitive**, not actual Auth/JWT,
+acceptance/password, resend, mail or browser evidence. T5 deactivation/session
+revocation remains user-deferred. The verifier reported executed probes in scratch, but the subsequent authorized
+retention worker found all six sources missing (ENOENT), so exact source parity
+could not be established. No tests were reconstructed or repeated. Repository
+retention, functional parent spot check and applicable native review remain pending;
+the original execution result above is reported evidence, not retained runnable proof.
+A later explicitly authorized writer created NEW durable regression sources under
+`scripts/staff_completion_probe/` and their [run contract](staff-invitation-completion.md).
+These are not recovered historical sources. Compilation and the parent syntax-only
+spot check passed; the first new functional invocation failed in preflight before
+setup, with zero assertions, outcomes or observed waits. No stack was created,
+no correction was used, and no setup retry or repeated independent run occurred.
+The separately authorized preparation correction then passed all NEW durable groups:
+**258 assertions / 76 outcomes**, 35 protected-state comparisons across 27 tables
+and two sequence states, with four observed-lock races and zero subsequent test-code
+corrections. The owned stack and scratch were removed. Parent syntax-only and
+whitespace spot checks passed. The first failed attempt remains in the contract;
+the later pass is not a recovery of lost historical source bytes.
+Source commit `cb52f4b` assessed reviewDue=false/under_budget. Durable proof commit
+`7c23446` assessed reviewDue=true. Initial reviewer launches stopped before execution
+on missing effective routing; those failed preparations remain in the task log.
+After the user explicitly applied the existing profile to this session, all four
+native lenses ran with `openai-codex/gpt-6.1-sol` and the final event approved.
+Exact acknowledgement burned `review-b6d1a979e7046340` at consumed revision
+`sha256:16faf5ee5790825267dd7196c95cc80f1cfb792ce649cea5fce1365b3b2ad790`.
+No functional or independent verification was repeated for this closure. The clean
+registered review worktree was restored to its original commit. TypeScript/build
+are not applicable to this SQL-only unit. Native approval covers the proof slice,
+not a complete invitation journey, publishing or deferred T5.
 
 ## Verified public-capture checks
 
@@ -296,3 +417,80 @@ No source correction or new functional rerun was needed during native review.
 User authorized a local commit only; no push, merge or deployment. SQL-role
 proof only; real JWT HTTP verification is a separate follow-up audit task.
 No account lifecycle or concurrency redesign.
+
+## Bound invitation resend preparation (T3b3a)
+
+Independent verification of `cd6e57d..515df9b` passed the focused **216/216**
+checks in a fresh minimal isolated copy, with no blocker and 78 source/config/helper
+files preserved. A separate parent-owned focused spot check also passed
+**216/216**, exit 0. Both verified owned resource and generated-directory removal.
+The full **2581/41** suite and four differentials remain writer-owned evidence,
+not independent reruns. Exact-range native assessment returned `reviewDue=false`
+(`under_budget`), not native approval; security escalation required and received
+independent verification. No transport, email, concurrency or T5 proof is claimed.
+
+Observed interface RED: focused 0041 exited 1 at `42883`, missing
+`prepare_bound_staff_invitation_resend(uuid,uuid,uuid)`, after nine prerequisite
+assertions passed. Later assertions did not run during RED. Initial GREEN passed
+189/189; the full isolated suite passed 2554/2554 across 41 files.
+Self-review added explicit journal-only success snapshots, binding mismatch and
+reverse old/new action collisions. That expanded focused run exited 1 after 140
+passing assertions: the mismatch fixture collided with the existing unique bound
+UUID constraint before reaching the RPC. ONE fixture correction selected an
+already-existing, unbound synthetic actor UUID instead; no production change or
+expectation weakening. Final focused **216/216** and full **2581/2581 across 41
+files** passed, exit 0. No second correction was used.
+
+Commands, each foreground in the owned generated project:
+
+```sh
+pnpm exec supabase test db supabase/tests/0041_staff_invitation_bound_resend_test.sql --workdir "$BOUND_RESEND_WORKDIR"
+pnpm exec supabase test db --workdir "$BOUND_RESEND_WORKDIR"
+'/c/Users/juanm/AppData/Local/Programs/Python/Python313/python.exe' -B "$BOUND_RESEND_DIFFERENTIAL"
+git diff --check
+```
+
+The scratch differential installed the actual base `cd6e57d` legacy function and
+CHECK, read with `git show ...:supabase/migrations/20261107110000_staff_invitation_intents.sql`,
+inside rollback-only transactions of the owned candidate database. It compared
+`psql -X -qAt -v ON_ERROR_STOP=1 -v VERBOSITY=terse` exit/stdout/stderr against the
+candidate. All four comparisons matched: new legacy action `bound_resend` yielded
+exit 3, empty stdout and `ERROR:  Datos de invitación inválidos.`; ordinary create,
+resend and revoke yielded exit 0, identical invitation UUID output and empty
+stderr. The Python comparison command exited 0. No committed test reads history.
+
+SQL-role proof only: actual role denials, full public/Auth-user/identity and
+sequence snapshots, journal-only success, retry revalidation, legacy regressions
+and insertion-failure rollback. Shared helper and historical migrations were not
+edited. One cached-image disposable project used unchanged `http_test_support.py`
+ownership/cleanup; no shared reset, installation or provider request. JS typecheck
+and build are not applicable to this SQL/documentation-only unit. No new race,
+JWT, email, transport, full invitation journey or T5 completion is claimed.
+The first whitespace check exited 2 for one extra EOF blank line in this entry;
+one documentation correction removed it and the check then exited 0. Owned Docker
+container/volume/network and generated project-directory absence were verified.
+
+## Current-actor bound-resend service (T3b3b1)
+
+Observed RED: `node --test apps/backoffice/features/accounts/invitations/management.test.ts`
+exited 1 with `ERR_MODULE_NOT_FOUND` for the new management module. Implementation
+then passed 55/55; two self-review cases added Admin/canonical email length and
+simulated post-journal response loss. Final focused **57/57** and full backoffice
+**91/91** passed, exit 0. No ordinary failing-check correction was needed.
+
+Commands, foreground with finite timeouts (pnpm used the authorized process-only
+`export PATH='/c/Users/juanm/AppData/Local/pnpm':"$PATH"` prefix):
+
+- `node --test apps/backoffice/features/accounts/invitations/management.test.ts`: 57/57.
+- `pnpm --filter @dealership/backoffice test`: 91/91, including 34 unchanged regressions.
+- `pnpm --filter @dealership/backoffice typecheck --incremental false`: exit 0.
+- `pnpm --filter @dealership/backoffice build`: exit 0; only `/` and `/_not-found` routes.
+
+Injected-fetch tests check exact requests, credential isolation, authenticated
+UUID source, immutable private reply, snapshot boundaries, redirects, cleared
+independent deadlines and fixed denied/uncertain outcomes. Simulated journal
+persistence is not database-permission or genuine Auth evidence. Existing SQL,
+onboarding and recovery sources/tests are unchanged, so no shared-code
+differential or live proof is required. Existing module-type warnings remain.
+This is private preparation only, not resend delivery, SMTP, a public route,
+end-to-end S4 or T5/S6–S7 completion. Parent independent verification is separate.
